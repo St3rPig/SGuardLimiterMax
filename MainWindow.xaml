@@ -1,0 +1,37 @@
+<!--
+    ╔══════════════════════════════════════════════════════════════════╗
+    ║  SGuard Limiter Max — MainWindow                                 ║
+    ║                                                                  ║
+    ║  PLACEHOLDER — UI design delegated to Gemini.                    ║
+    ║                                                                  ║
+    ║  DataContext is set to MainViewModel in the code-behind.         ║
+    ║  Bindable properties available on the ViewModel:                 ║
+    ║    • IsGameRunning  (bool)                                       ║
+    ║    • StatusText     (string)                                     ║
+    ║    • UnbindCPU      (bool, two-way)                              ║
+    ║    • OptimizePower  (bool, two-way)                              ║
+    ║    • FlushDNS       (bool, two-way)                              ║
+    ║    • KeepMonitoringAfterExit (bool, two-way)                     ║
+    ║  Commands available:                                             ║
+    ║    • ApplyOptimizationsNow() — direct method call from code-     ║
+    ║      behind or wrapped in an ICommand for XAML binding.          ║
+    ╚══════════════════════════════════════════════════════════════════╝
+-->
+<Window x:Class="SGuardLimiterMax.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SGuard Limiter Max"
+        Height="480" Width="720"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize">
+
+    <!-- ══ ROOT LAYOUT — replace with Gemini design ══ -->
+    <Grid>
+        <TextBlock Text="UI Placeholder — Gemini will provide the final layout."
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   FontSize="16"
+                   Foreground="Gray"/>
+    </Grid>
+
+</Window>

@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>SGuardLimiterMax</RootNamespace>
+    <AssemblyName>SGuardLimiterMax</AssemblyName>
+    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+
+    <!-- Single-file publish settings -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>false</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+
+    <!-- Assembly metadata -->
+    <Version>1.0.0</Version>
+    <Company>Open Source</Company>
+    <Product>SGuard Limiter Max</Product>
+    <Description>Lightweight process optimizer and power manager for games using SGuard anti-cheat.</Description>
+  </PropertyGroup>
+
+  <!-- System Tray icon resource -->
+  <ItemGroup>
+    <Resource Include="Assets\icon.ico" Condition="Exists('Assets\icon.ico')" />
+  </ItemGroup>
+
+</Project>

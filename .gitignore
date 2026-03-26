@@ -1,0 +1,74 @@
+## ── Visual Studio / .NET ────────────────────────────────────────────────────
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+!**/packages/build/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# MSBuild
+*.binlog
+*.msbuild.log
+
+# Publish output
+publish/
+PublishProfiles/
+
+## ── Rider / JetBrains ───────────────────────────────────────────────────────
+.idea/
+*.sln.iml
+
+## ── App runtime artifacts ───────────────────────────────────────────────────
+# Portable config generated at runtime — do not commit user settings
+Config.json
+
+## ── OS ──────────────────────────────────────────────────────────────────────
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS (for contributors on Mac)
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+## ── Misc ────────────────────────────────────────────────────────────────────
+*.orig
+*.rej
+*~

@@ -1,0 +1,12 @@
+<Application x:Class="SGuardLimiterMax.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml"
+             ShutdownMode="OnExplicitShutdown">
+    <Application.Resources>
+        <!--
+            Global resource dictionaries (styles, themes, brushes) go here.
+            Gemini will populate this section with the visual design system.
+        -->
+    </Application.Resources>
+</Application>
