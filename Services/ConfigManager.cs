@@ -37,7 +37,6 @@ public static class ConfigManager
         }
         catch
         {
-            // Corrupt or unreadable file — reset to defaults.
             var defaults = new AppConfig();
             Save(defaults);
             return defaults;
@@ -54,9 +53,6 @@ public static class ConfigManager
             string json = JsonSerializer.Serialize(config, JsonOptions);
             File.WriteAllText(ConfigPath, json);
         }
-        catch
-        {
-            // Write failure is non-fatal; silently ignore.
-        }
+        catch { }
     }
 }

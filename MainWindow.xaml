@@ -1,37 +1,714 @@
-<!--
-    ╔══════════════════════════════════════════════════════════════════╗
-    ║  SGuard Limiter Max — MainWindow                                 ║
-    ║                                                                  ║
-    ║  PLACEHOLDER — UI design delegated to Gemini.                    ║
-    ║                                                                  ║
-    ║  DataContext is set to MainViewModel in the code-behind.         ║
-    ║  Bindable properties available on the ViewModel:                 ║
-    ║    • IsGameRunning  (bool)                                       ║
-    ║    • StatusText     (string)                                     ║
-    ║    • UnbindCPU      (bool, two-way)                              ║
-    ║    • OptimizePower  (bool, two-way)                              ║
-    ║    • FlushDNS       (bool, two-way)                              ║
-    ║    • KeepMonitoringAfterExit (bool, two-way)                     ║
-    ║  Commands available:                                             ║
-    ║    • ApplyOptimizationsNow() — direct method call from code-     ║
-    ║      behind or wrapped in an ICommand for XAML binding.          ║
-    ╚══════════════════════════════════════════════════════════════════╝
--->
 <Window x:Class="SGuardLimiterMax.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="SGuard Limiter Max"
-        Height="480" Width="720"
-        WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize">
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="SGuard Limiter Max" Icon="/Assets/SGuard_Limiter_Max.png"
+        Height="740" Width="880" MinWidth="700" MinHeight="560"
+        WindowStyle="None" AllowsTransparency="False" Background="#111111"
+        WindowStartupLocation="CenterScreen" ResizeMode="CanResize">
 
-    <!-- ══ ROOT LAYOUT — replace with Gemini design ══ -->
-    <Grid>
-        <TextBlock Text="UI Placeholder — Gemini will provide the final layout."
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   FontSize="16"
-                   Foreground="Gray"/>
-    </Grid>
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="0" ResizeBorderThickness="6"
+                            GlassFrameThickness="0" UseAeroCaptionButtons="False"/>
+    </shell:WindowChrome.WindowChrome>
 
+    <Window.Resources>
+
+        <!-- ── Toggle Switch ─────────────────────────────────────────────── -->
+        <Style x:Key="ToggleStyle" TargetType="CheckBox">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="#CCCCCC"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,8"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="54"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="Track" Grid.Column="0"
+                                    Width="46" Height="24" CornerRadius="12"
+                                    HorizontalAlignment="Left" VerticalAlignment="Center">
+                                <Border.Background><SolidColorBrush Color="#2E2E2E"/></Border.Background>
+                            </Border>
+                            <Ellipse x:Name="Thumb" Grid.Column="0"
+                                     Width="18" Height="18"
+                                     HorizontalAlignment="Left" VerticalAlignment="Center"
+                                     Margin="4,0,0,0">
+                                <Ellipse.Fill><SolidColorBrush Color="#666666"/></Ellipse.Fill>
+                                <Ellipse.RenderTransform>
+                                    <TranslateTransform x:Name="ThumbX" X="0"/>
+                                </Ellipse.RenderTransform>
+                            </Ellipse>
+                            <ContentPresenter Grid.Column="1" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="ThumbX" Storyboard.TargetProperty="X" To="22" Duration="0:0:0.16">
+                                                <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <ColorAnimation Storyboard.TargetName="Track" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#00C8E0" Duration="0:0:0.16"/>
+                                            <ColorAnimation Storyboard.TargetName="Thumb" Storyboard.TargetProperty="(Ellipse.Fill).(SolidColorBrush.Color)" To="#FFFFFF" Duration="0:0:0.12"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="ThumbX" Storyboard.TargetProperty="X" To="0" Duration="0:0:0.16">
+                                                <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <ColorAnimation Storyboard.TargetName="Track" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#2E2E2E" Duration="0:0:0.16"/>
+                                            <ColorAnimation Storyboard.TargetName="Thumb" Storyboard.TargetProperty="(Ellipse.Fill).(SolidColorBrush.Color)" To="#666666" Duration="0:0:0.12"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                                <Setter Property="Foreground" Value="#E8E8E8"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Track" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#00E5FF" BlurRadius="8" ShadowDepth="0" Opacity="0.35"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ── Primary Button ────────────────────────────────────────────── -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="#161616"/>
+            <Setter Property="Foreground" Value="#00E5FF"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                CornerRadius="8" BorderBrush="#00E5FF" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#00E5FF"/>
+                                <Setter Property="Foreground" Value="#060606"/>
+                                <Setter TargetName="Bd" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#00E5FF" BlurRadius="14" ShadowDepth="0" Opacity="0.45"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#00B8CC"/>
+                                <Setter TargetName="Bd" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                <Setter TargetName="Bd" Property="RenderTransform">
+                                    <Setter.Value><ScaleTransform ScaleX="0.96" ScaleY="0.96"/></Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ── Secondary Button ──────────────────────────────────────────── -->
+        <Style x:Key="SecondaryButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#555555"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                CornerRadius="5" BorderBrush="#333333" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#555555"/>
+                                <Setter Property="Foreground" Value="#888888"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#222222"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ── Monitor Mode Button ───────────────────────────────────────── -->
+        <Style x:Key="MonitorBtn" TargetType="Button">
+            <Setter Property="Background" Value="#091C20"/>
+            <Setter Property="Foreground" Value="#00C8E0"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                CornerRadius="5" BorderBrush="#00C8E0" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#00C8E0"/>
+                                <Setter Property="Foreground" Value="#060606"/>
+                                <Setter TargetName="Bd" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#00E5FF" BlurRadius="12" ShadowDepth="0" Opacity="0.5"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#009BAE"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ── Title Bar Button ───────────────────────────────────────────── -->
+        <Style x:Key="TitleBarBtn" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#555555"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#272727"/>
+                                <Setter Property="Foreground" Value="#CCCCCC"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#363636"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ── Dark ComboBox ──────────────────────────────────────────────── -->
+        <Style x:Key="DarkComboBox" TargetType="ComboBox">
+            <Setter Property="Background" Value="#1A1A1A"/>
+            <Setter Property="Foreground" Value="#CCCCCC"/>
+            <Setter Property="BorderBrush" Value="#333333"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="5">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="24"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ContentPresenter Grid.Column="0"
+                                                      Content="{TemplateBinding SelectionBoxItem}"
+                                                      ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                      Margin="8,4,0,4" VerticalAlignment="Center"/>
+                                    <Path Grid.Column="1" Data="M0,0 L4,4 L8,0" Stroke="#555555"
+                                          StrokeThickness="1.5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+                            <Popup x:Name="PART_Popup" IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True" Focusable="False"
+                                   PopupAnimation="Slide" Placement="Bottom">
+                                <Border Background="#1E1E1E" BorderBrush="#333333" BorderThickness="1"
+                                        CornerRadius="5" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="200">
+                                    <ScrollViewer><ItemsPresenter/></ScrollViewer>
+                                </Border>
+                            </Popup>
+                            <ToggleButton Background="Transparent" BorderThickness="0"
+                                          IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                          Focusable="False"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#555555"/>
+                            </Trigger>
+                            <Trigger Property="IsDropDownOpen" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#00C8E0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Foreground" Value="#CCCCCC"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Padding" Value="10,6"/>
+                        <Setter Property="FontSize" Value="12"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ComboBoxItem">
+                                    <Border x:Name="Bd" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsHighlighted" Value="True">
+                                            <Setter TargetName="Bd" Property="Background" Value="#2A2A2A"/>
+                                            <Setter Property="Foreground" Value="#00E5FF"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ── Dark TextBox ───────────────────────────────────────────────── -->
+        <Style x:Key="DarkTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#1A1A1A"/>
+            <Setter Property="Foreground" Value="#CCCCCC"/>
+            <Setter Property="BorderBrush" Value="#333333"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="CaretBrush" Value="#00E5FF"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#00C8E0"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#444444"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <!-- ── Root ──────────────────────────────────────────────────────────── -->
+    <Border Background="#111111" BorderBrush="#252525" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="64"/>
+            </Grid.RowDefinitions>
+
+            <!-- ── Title Bar (drag area) ─────────────────────────────────── -->
+            <Grid Grid.Row="0" Background="Transparent" MouseLeftButtonDown="Window_MouseLeftButtonDown">
+                <Border VerticalAlignment="Bottom" Height="1" Background="#202020"/>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="18,0,0,0">
+                    <Viewbox Width="15" Height="15" Margin="0,0,9,0">
+                        <Path Fill="#00E5FF"
+                              Data="M12,2L4,5v6.09c0,5.05,3.41,9.76,8,10.91c4.59-1.15,8-5.86,8-10.91V5L12,2z"/>
+                    </Viewbox>
+                    <TextBlock Text="SGUARD LIMITER MAX"
+                               Foreground="#00E5FF" FontSize="14" FontWeight="Black"
+                               VerticalAlignment="Center" FontFamily="Segoe UI"/>
+                    <TextBlock Text="v1.0" Foreground="#2A2A2A" FontSize="10"
+                               VerticalAlignment="Center" Margin="8,1,0,0"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                            VerticalAlignment="Center" Margin="0,0,10,0">
+                    <Button Style="{StaticResource MonitorBtn}" Content="进入监控"
+                            Width="74" Height="26" Click="BtnEnterMonitor_Click" Margin="0,0,10,0"/>
+                    <Button Style="{StaticResource TitleBarBtn}" Content="—"
+                            FontSize="13" Click="BtnMinimize_Click" Margin="0,0,2,0"/>
+                    <Button Style="{StaticResource TitleBarBtn}" Content="✕"
+                            FontSize="12" Click="BtnClose_Click"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- ── Two-column content ─────────────────────────────────────── -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="1"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- ── Left column: 进程调度 ─────────────────────────────── -->
+                <ScrollViewer Grid.Column="0"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <Border Background="#181818" CornerRadius="8" Margin="12,12,6,12" Padding="18,14">
+                        <StackPanel>
+                            <TextBlock Text="进程调度" Foreground="#3A3A3A" FontSize="10"
+                                       FontWeight="Bold" Margin="0,0,0,8"/>
+
+                            <CheckBox Style="{StaticResource ToggleStyle}" IsChecked="{Binding ThrottleSGuard}">
+                                <StackPanel>
+                                    <TextBlock Text="限制 SGuard 进程" Foreground="#DEDEDE" FontSize="13" FontWeight="SemiBold"/>
+                                    <TextBlock Text="优先级降至 Idle，CPU 亲和度限为末位核心" Foreground="#484848" FontSize="11" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </CheckBox>
+
+                            <CheckBox Style="{StaticResource ToggleStyle}" IsChecked="{Binding BoostGamePriority}">
+                                <StackPanel>
+                                    <TextBlock Text="提升游戏进程优先级" Foreground="#DEDEDE" FontSize="13" FontWeight="SemiBold"/>
+                                    <TextBlock Text="设为 High 级，效果因系统负载而异" Foreground="#484848" FontSize="11" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </CheckBox>
+
+                            <CheckBox Style="{StaticResource ToggleStyle}" IsChecked="{Binding UnbindCPU}">
+                                <StackPanel>
+                                    <TextBlock Text="游戏进程解绑核心 0" Foreground="#DEDEDE" FontSize="13" FontWeight="SemiBold"/>
+                                    <TextBlock Text="避开核心 0 以减少中断竞争，效果因 CPU 架构而异" Foreground="#484848" FontSize="11" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </CheckBox>
+
+                            <CheckBox Style="{StaticResource ToggleStyle}" IsChecked="{Binding OptimizePower}">
+                                <StackPanel>
+                                    <TextBlock Text="切换电源计划" Foreground="#DEDEDE" FontSize="13" FontWeight="SemiBold"/>
+                                    <TextBlock Text="游戏运行时切换到指定计划，防止 CPU 降频" Foreground="#484848" FontSize="11" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </CheckBox>
+
+                            <!-- Power plan picker -->
+                            <Border Margin="54,0,0,6" Padding="12,10" Background="#141414" CornerRadius="6">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                        <TextBlock Text="当前系统计划：" Foreground="#3A3A3A" FontSize="11" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding ActivePowerPlanName}" Foreground="#888888" FontSize="11" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="8"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="4"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox Grid.Column="0" Style="{StaticResource DarkComboBox}"
+                                                  ItemsSource="{Binding AvailablePowerPlans}"
+                                                  SelectedItem="{Binding SelectedTargetPlan, Mode=TwoWay}"
+                                                  DisplayMemberPath="Name"
+                                                  ToolTip="游戏启动时切换到此计划（留空 = 自动选最佳）"/>
+                                        <Button Grid.Column="2" Content="立即应用"
+                                                Style="{StaticResource SecondaryButton}"
+                                                Width="70" Height="28" Padding="0"
+                                                Click="BtnApplyPlan_Click"/>
+                                        <Button Grid.Column="4" Content="刷新"
+                                                Style="{StaticResource SecondaryButton}"
+                                                Width="44" Height="28" Padding="0"
+                                                Click="BtnRefreshPlans_Click"/>
+                                    </Grid>
+                                    <TextBlock Margin="0,6,0,0" Foreground="#2E2E2E" FontSize="10"
+                                               Text="未选择 = 游戏时自动激活「卓越性能」或「高性能」计划"/>
+                                </StackPanel>
+                            </Border>
+
+                            <CheckBox Style="{StaticResource ToggleStyle}" IsChecked="{Binding FlushDNS}">
+                                <StackPanel>
+                                    <TextBlock Text="刷新 DNS 缓存" Foreground="#DEDEDE" FontSize="13" FontWeight="SemiBold"/>
+                                    <TextBlock Text="清除过期解析记录，减少连接延迟" Foreground="#484848" FontSize="11" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </CheckBox>
+
+                            <CheckBox Style="{StaticResource ToggleStyle}" IsChecked="{Binding TimerResolution}">
+                                <StackPanel>
+                                    <TextBlock Text="提升系统计时器精度" Foreground="#DEDEDE" FontSize="13" FontWeight="SemiBold"/>
+                                    <TextBlock Text="将 Windows 时钟从默认 15.6ms 提升，改善帧节奏与输入响应" Foreground="#484848" FontSize="11" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </CheckBox>
+
+                            <!-- Timer resolution picker -->
+                            <Border Margin="54,0,0,6" Padding="12,10" Background="#141414" CornerRadius="6">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                        <TextBlock Text="当前系统精度：" Foreground="#3A3A3A" FontSize="11" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding ActiveTimerResolutionText}" Foreground="#888888" FontSize="11" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="8"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox Grid.Column="0" Style="{StaticResource DarkComboBox}"
+                                                  ItemsSource="{Binding TimerResolutionOptions}"
+                                                  SelectedItem="{Binding SelectedTimerResolutionOption, Mode=TwoWay}"
+                                                  DisplayMemberPath="Label"
+                                                  ToolTip="游戏检测时自动启用，游戏退出后还原"/>
+                                        <Button Grid.Column="2" Content="立即应用"
+                                                Style="{StaticResource SecondaryButton}"
+                                                Width="70" Height="28" Padding="0"
+                                                Click="BtnApplyTimer_Click"/>
+                                    </Grid>
+                                    <TextBlock Margin="0,6,0,0" Foreground="#2E2E2E" FontSize="10"
+                                               Text="竞技主机选 1ms；大多数设备推荐 2ms；轻薄本选 4ms；旧机型选 8ms"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </ScrollViewer>
+
+                <!-- Column separator -->
+                <Border Grid.Column="1" Background="#1E1E1E"/>
+
+                <!-- ── Right column: 自定义游戏 + 运行方式 ───────────────── -->
+                <ScrollViewer Grid.Column="2"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel>
+
+                        <!-- 自定义游戏进程 -->
+                        <Border Background="#181818" CornerRadius="8" Margin="6,12,12,6" Padding="18,14">
+                            <StackPanel>
+                                <TextBlock Text="自定义游戏进程" Foreground="#3A3A3A" FontSize="10"
+                                           FontWeight="Bold" Margin="0,0,0,10"/>
+
+                                <ItemsControl ItemsSource="{Binding CustomGames}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="#141414" CornerRadius="5" Margin="0,0,0,4" Padding="10,8">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0">
+                                                        <TextBlock Text="{Binding DisplayName}" Foreground="#CCCCCC" FontSize="12" FontWeight="SemiBold"/>
+                                                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                                            <TextBlock Text="{Binding ProcessName}" Foreground="#3A3A3A" FontSize="11" Margin="0,0,10,0"/>
+                                                            <Border CornerRadius="3" Padding="5,1" Margin="0,0,4,0">
+                                                                <Border.Style>
+                                                                    <Style TargetType="Border">
+                                                                        <Setter Property="Background" Value="#1A2E2E"/>
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding BoostPriority}" Value="True">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Border.Style>
+                                                                <TextBlock Text="高优先级" Foreground="#00A8B8" FontSize="10"/>
+                                                            </Border>
+                                                            <Border CornerRadius="3" Padding="5,1">
+                                                                <Border.Style>
+                                                                    <Style TargetType="Border">
+                                                                        <Setter Property="Background" Value="#1A1A2E"/>
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding UnbindCpu0}" Value="True">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Border.Style>
+                                                                <TextBlock Text="解绑核心0" Foreground="#8888CC" FontSize="10"/>
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                    <Button Grid.Column="1" Content="移除"
+                                                            Style="{StaticResource SecondaryButton}"
+                                                            Width="44" Height="24" Padding="0"
+                                                            Tag="{Binding}" Click="BtnRemoveGame_Click"
+                                                            VerticalAlignment="Center"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <TextBlock Foreground="#2A2A2A" FontSize="11" TextAlignment="Center"
+                                           Margin="0,4,0,10" Text="暂无自定义进程，使用下方添加">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding CustomGames.Count}" Value="0">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <Border Background="#141414" CornerRadius="6" Padding="10,10" Margin="0,4,0,0">
+                                    <StackPanel>
+                                        <Grid Margin="0,0,0,6">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="8"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox x:Name="TxtProcessName" Grid.Column="0" Height="28"
+                                                     Style="{StaticResource DarkTextBox}" Tag="进程名（不含.exe）"/>
+                                            <TextBox x:Name="TxtDisplayName" Grid.Column="2" Height="28"
+                                                     Style="{StaticResource DarkTextBox}" Tag="显示名称（可留空）"/>
+                                        </Grid>
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="16"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="16"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <CheckBox x:Name="ChkBoostPriority" Grid.Column="0" IsChecked="True"
+                                                      Foreground="#888888" FontSize="11" Content="高优先级"
+                                                      VerticalContentAlignment="Center"/>
+                                            <CheckBox x:Name="ChkUnbindCpu0" Grid.Column="2"
+                                                      Foreground="#888888" FontSize="11" Content="解绑核心0"
+                                                      VerticalContentAlignment="Center"/>
+                                            <Button Grid.Column="4" Content="添加"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Width="52" Height="28" Padding="0"
+                                                    Click="BtnAddGame_Click"/>
+                                        </Grid>
+                                        <TextBlock Text="进程名示例：RustClient、cs2、EscapeFromTarkov"
+                                                   Foreground="#2A2A2A" FontSize="10"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 运行方式 -->
+                        <Border Background="#181818" CornerRadius="8" Margin="6,0,12,12" Padding="18,14">
+                            <StackPanel>
+                                <TextBlock Text="运行方式" Foreground="#3A3A3A" FontSize="10"
+                                           FontWeight="Bold" Margin="0,0,0,8"/>
+
+                                <CheckBox Style="{StaticResource ToggleStyle}" IsChecked="{Binding AutoMinimizeOnGame}">
+                                    <StackPanel>
+                                        <TextBlock Text="游戏启动后自动隐藏至托盘" Foreground="#DEDEDE" FontSize="13" FontWeight="SemiBold"/>
+                                        <TextBlock Text="检测到游戏进程后最小化，在后台持续监控" Foreground="#484848" FontSize="11" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </CheckBox>
+
+                                <CheckBox Style="{StaticResource ToggleStyle}" IsChecked="{Binding ExitWithGame}">
+                                    <StackPanel>
+                                        <TextBlock Text="游戏退出时自动退出" Foreground="#DEDEDE" FontSize="13" FontWeight="SemiBold"/>
+                                        <TextBlock Text="检测到游戏关闭后，程序随之退出并还原所有优化（默认常驻）" Foreground="#484848" FontSize="11" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </CheckBox>
+
+                                <CheckBox Style="{StaticResource ToggleStyle}" IsChecked="{Binding AutoStart}">
+                                    <StackPanel>
+                                        <TextBlock Text="开机自启" Foreground="#DEDEDE" FontSize="13" FontWeight="SemiBold"/>
+                                        <TextBlock Text="写入注册表启动项，以静默模式随系统启动" Foreground="#484848" FontSize="11" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </CheckBox>
+
+                                <CheckBox Style="{StaticResource ToggleStyle}" IsChecked="{Binding ShowNotifications}">
+                                    <StackPanel>
+                                        <TextBlock Text="托盘气泡通知" Foreground="#DEDEDE" FontSize="13" FontWeight="SemiBold"/>
+                                        <TextBlock Text="检测到游戏、进入托盘、游戏退出时显示系统通知" Foreground="#484848" FontSize="11" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </CheckBox>
+
+                                <CheckBox Style="{StaticResource ToggleStyle}" IsChecked="{Binding RestorePowerOnExit}">
+                                    <StackPanel>
+                                        <TextBlock Text="退出时还原电源计划" Foreground="#DEDEDE" FontSize="13" FontWeight="SemiBold"/>
+                                        <TextBlock Text="程序或游戏退出时，还原到优化前的电源计划" Foreground="#484848" FontSize="11" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </CheckBox>
+
+                                <CheckBox Style="{StaticResource ToggleStyle}" IsChecked="{Binding RestoreTimerOnExit}">
+                                    <StackPanel>
+                                        <TextBlock Text="退出时还原计时器精度" Foreground="#DEDEDE" FontSize="13" FontWeight="SemiBold"/>
+                                        <TextBlock Text="程序或游戏退出时，还原系统计时器到原始精度" Foreground="#484848" FontSize="11" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </CheckBox>
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+
+            <!-- ── Status Bar ─────────────────────────────────────────────── -->
+            <Grid Grid.Row="2" Margin="16,0,16,0">
+                <Border VerticalAlignment="Top" Height="1" Background="#1E1E1E"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="136"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Ellipse Width="7" Height="7" VerticalAlignment="Center" Margin="0,0,8,0">
+                            <Ellipse.Style>
+                                <Style TargetType="Ellipse">
+                                    <Setter Property="Fill" Value="#4A6E8A"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsGameRunning}" Value="True">
+                                            <Setter Property="Fill" Value="#4ADE80"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Ellipse.Style>
+                        </Ellipse>
+                        <TextBlock Text="{Binding StatusText}" FontSize="12"
+                                   Foreground="#4A6E8A" VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="#4A6E8A"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsGameRunning}" Value="True">
+                                            <Setter Property="Foreground" Value="#4ADE80"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+
+                    <Button Grid.Column="1" Content="保存配置"
+                            Style="{StaticResource SecondaryButton}"
+                            Width="90" Height="28"
+                            Click="BtnSaveConfig_Click"/>
+
+                    <Button Grid.Column="3" Height="38"
+                            Content="执行优化"
+                            Style="{StaticResource PrimaryButton}"
+                            Click="BtnApplyNow_Click"/>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Border>
 </Window>

@@ -41,6 +41,7 @@ artifacts/
 # Publish output
 publish/
 PublishProfiles/
+!Properties/PublishProfiles/
 
 ## ── Rider / JetBrains ───────────────────────────────────────────────────────
 .idea/
@@ -67,6 +68,13 @@ $RECYCLE.BIN/
 ._*
 .Spotlight-V100
 .Trashes
+
+## ── Local scripts ───────────────────────────────────────────────────────────
+# Screen recording / demo scripts — not for distribution
+SCREEN_SCRIPT.md
+
+## ── Claude Code ─────────────────────────────────────────────────────────────
+.claude/
 
 ## ── Misc ────────────────────────────────────────────────────────────────────
 *.orig

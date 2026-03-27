@@ -4,17 +4,19 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>SGuardLimiterMax</RootNamespace>
     <AssemblyName>SGuardLimiterMax</AssemblyName>
-    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
 
-    <!-- Single-file publish settings -->
+    <!-- Single-file publish defaults (SelfContained is controlled per publish profile) -->
     <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>false</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\SGuard_Limiter_Max.ico</ApplicationIcon>
 
     <!-- Assembly metadata -->
     <Version>1.0.0</Version>
@@ -25,7 +27,8 @@
 
   <!-- System Tray icon resource -->
   <ItemGroup>
-    <Resource Include="Assets\icon.ico" Condition="Exists('Assets\icon.ico')" />
+    <Resource Include="Assets\SGuard_Limiter_Max.ico" />
+    <Resource Include="Assets\SGuard_Limiter_Max.png" />
   </ItemGroup>
 
 </Project>

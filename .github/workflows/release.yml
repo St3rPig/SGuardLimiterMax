@@ -1,0 +1,111 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - "v*"
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write   # needed to create GitHub Releases
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      # ── Standalone (self-contained, ~70 MB) ───────────────────────────────────
+      - name: Publish standalone
+        run: |
+          dotnet publish SGuardLimiterMax.csproj `
+            -c Release `
+            -p:PublishProfile=Standalone `
+            --nologo
+
+      # ── Framework-dependent (~2 MB) ───────────────────────────────────────────
+      - name: Publish framework
+        run: |
+          dotnet publish SGuardLimiterMax.csproj `
+            -c Release `
+            -p:PublishProfile=Framework `
+            --nologo
+
+      # ── Rename outputs ────────────────────────────────────────────────────────
+      - name: Rename artifacts
+        shell: pwsh
+        run: |
+          Copy-Item publish\standalone\SGuardLimiterMax.exe `
+                    publish\SGuardLimiterMax_standalone.exe
+          Copy-Item publish\framework\SGuardLimiterMax.exe `
+                    publish\SGuardLimiterMax_framework.exe
+
+      # ── SHA256 checksums ──────────────────────────────────────────────────────
+      - name: Generate checksums
+        shell: pwsh
+        run: |
+          $files = @(
+            "publish\SGuardLimiterMax_standalone.exe",
+            "publish\SGuardLimiterMax_framework.exe"
+          )
+          $lines = foreach ($f in $files) {
+            $hash = (Get-FileHash $f -Algorithm SHA256).Hash
+            "$hash  $(Split-Path $f -Leaf)"
+          }
+          $lines | Set-Content publish\SHA256SUMS.txt -Encoding UTF8
+          Write-Host "=== SHA256SUMS.txt ==="
+          Get-Content publish\SHA256SUMS.txt
+
+      # ── Upload artifacts (all builds — useful for PR checks) ──────────────────
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries
+          path: |
+            publish/SGuardLimiterMax_standalone.exe
+            publish/SGuardLimiterMax_framework.exe
+            publish/SHA256SUMS.txt
+          retention-days: 14
+
+      # ── Create GitHub Release (tag pushes only) ───────────────────────────────
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            publish/SGuardLimiterMax_standalone.exe
+            publish/SGuardLimiterMax_framework.exe
+            publish/SHA256SUMS.txt
+          body: |
+            ## 下载 / Download
+
+            | 文件 | 说明 |
+            |---|---|
+            | `SGuardLimiterMax_standalone.exe` | **推荐**：自带运行时，开箱即用 |
+            | `SGuardLimiterMax_framework.exe` | 需已安装 [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0) |
+
+            ## 验证完整性 / Verify Integrity
+
+            下载后请用 PowerShell 验证 SHA256，确认文件未被篡改：
+
+            ```powershell
+            # 替换为你下载的文件名
+            (Get-FileHash .\SGuardLimiterMax_standalone.exe -Algorithm SHA256).Hash
+            ```
+
+            将输出与 `SHA256SUMS.txt` 中的值对比，**完全一致才是安全的**。
+
+            > 所有 Release 二进制均由 GitHub Actions 直接从源码编译，未经人工上传。
+          generate_release_notes: true
+          draft: false
+          prerelease: false
