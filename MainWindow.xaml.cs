@@ -26,8 +26,21 @@ namespace SGuardLimiterMax
 
             InitializeTrayIcon();
 
-            if (App.IsAutoStart)
-                EnterMonitorMode();
+            // When launched via --autostart, App.OnStartup() will NOT call Show() on
+            // this window, so we never flash a UI. Just make the tray icon visible here
+            // and post a balloon notification once the message loop is running.
+            if (App.IsAutoStart && _trayIcon != null)
+            {
+                _trayIcon.Visible = true;
+                Dispatcher.BeginInvoke(
+                    System.Windows.Threading.DispatcherPriority.ApplicationIdle,
+                    () =>
+                    {
+                        if (_vm?.ShowNotifications == true)
+                            _trayIcon.ShowBalloonTip(3000, "SGuard Limiter Max",
+                                "已进入监测模式，将在检测到游戏时自动优化。", ToolTipIcon.None);
+                    });
+            }
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)

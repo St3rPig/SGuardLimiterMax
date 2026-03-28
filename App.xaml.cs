@@ -33,6 +33,13 @@ public partial class App : Application
                 MessageBoxButton.OK, MessageBoxImage.Error);
             ex.Handled = true;
         };
+
+        // Manually create the main window so we can skip Show() on autostart,
+        // avoiding any visible flash before the window hides itself.
+        var window = new MainWindow();
+        MainWindow = window;
+        if (!IsAutoStart)
+            window.Show();
     }
 
     protected override void OnExit(ExitEventArgs e)
