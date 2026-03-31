@@ -15,6 +15,7 @@ namespace SGuardLimiterMax
         private NotifyIcon?                _trayIcon;
         private ViewModels.MainViewModel? _vm;
         private bool                       _trayIconShouldBeVisible;
+        private string?                    _pendingUpdateUrl;
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         private static extern uint RegisterWindowMessage(string message);
@@ -29,6 +30,7 @@ namespace SGuardLimiterMax
             _vm.GameDetected          += OnGameDetected;
             _vm.GameExited            += OnGameExited;
             _vm.ExitRequested         += ShutdownApp;
+            _vm.UpdateAvailable       += OnUpdateAvailable;
 
             InitializeTrayIcon();
 
@@ -109,7 +111,8 @@ namespace SGuardLimiterMax
                 Visible = false
             };
 
-            _trayIcon.DoubleClick += (s, e) => ShowWindow();
+            _trayIcon.DoubleClick       += (s, e) => ShowWindow();
+            _trayIcon.BalloonTipClicked += OnBalloonTipClicked;
 
             var menu = new ContextMenuStrip();
             menu.Items.Add("打开面板", null, (s, e) => ShowWindow());
@@ -147,6 +150,31 @@ namespace SGuardLimiterMax
             _trayIcon.Text = "SGuard Limiter Max";
             if (_vm?.ShowNotifications == true)
                 _trayIcon.ShowBalloonTip(3000, "SGuard Limiter Max", message, ToolTipIcon.None);
+        }
+
+        private void OnUpdateAvailable(SGuardLimiterMax.Services.UpdateInfo info)
+        {
+            _pendingUpdateUrl = info.HtmlUrl;
+            _trayIcon?.ShowBalloonTip(
+                6000,
+                $"发现新版本 {info.TagName}",
+                "点击气泡前往下载页面",
+                ToolTipIcon.None);
+        }
+
+        private void OnBalloonTipClicked(object? sender, EventArgs e)
+        {
+            if (_pendingUpdateUrl == null) return;
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName        = _pendingUpdateUrl,
+                    UseShellExecute = true
+                });
+            }
+            catch { }
+            finally { _pendingUpdateUrl = null; }
         }
 
         private void BtnMinimize_Click(object sender, RoutedEventArgs e)

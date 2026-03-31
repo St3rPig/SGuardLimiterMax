@@ -42,6 +42,9 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
     /// <summary>Raised on the UI thread when the app should shut down (e.g. ExitWithGame triggered).</summary>
     public event Action? ExitRequested;
 
+    /// <summary>Raised on the UI thread when a newer release is available on GitHub.</summary>
+    public event Action<UpdateInfo>? UpdateAvailable;
+
     // ── Construction ──────────────────────────────────────────────────────────
 
     public MainViewModel()
@@ -67,6 +70,9 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
         _timerResolutionPoller.Start();
 
         StartMonitor();
+
+        if (_config.CheckForUpdates)
+            _ = CheckForUpdatesAsync();
     }
 
     // ── Feature toggles ───────────────────────────────────────────────────────
@@ -151,6 +157,12 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
             OnPropertyChanged();
             StartupManager.Sync(value);
         }
+    }
+
+    public bool CheckForUpdates
+    {
+        get => _config.CheckForUpdates;
+        set { _config.CheckForUpdates = value; OnPropertyChanged(); }
     }
 
     // ── Power plan ────────────────────────────────────────────────────────────
@@ -610,6 +622,18 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
         StatusText = _config.ThrottleSGuard
             ? $"[生效中] {names} · SGuard 已限制"
             : $"[生效中] {names} · 优化已应用";
+    }
+
+    private async Task CheckForUpdatesAsync()
+    {
+        try
+        {
+            await Task.Delay(3000, _cts.Token);
+            var info = await UpdateChecker.CheckAsync(_cts.Token);
+            if (info == null) return;
+            await DispatchAsync(() => UpdateAvailable?.Invoke(info));
+        }
+        catch { }
     }
 
     // ── IDisposable ───────────────────────────────────────────────────────────

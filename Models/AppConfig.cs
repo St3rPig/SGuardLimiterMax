@@ -45,6 +45,9 @@ public class AppConfig
     /// <summary>Show tray balloon notifications (game detected, game exited, minimized). Disable for silent operation.</summary>
     public bool ShowNotifications { get; set; } = true;
 
+    /// <summary>Check GitHub Releases for a newer version on startup.</summary>
+    public bool CheckForUpdates { get; set; } = true;
+
     /// <summary>Restore the original power plan when the app exits or a game session ends. Default true.</summary>
     public bool RestorePowerOnExit { get; set; } = true;
 
