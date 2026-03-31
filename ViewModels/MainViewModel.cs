@@ -466,9 +466,6 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
                 var current    = ProcessOptimizer.GetRunningGames();
                 var currentSet = new HashSet<string>(current.Select(g => g.ProcessName));
 
-                if (currentSet.Count > 0 && _config.ThrottleSGuard)
-                    ProcessOptimizer.ThrottleSGuard();
-
                 var started    = current.Where(g => !previous.Contains(g.ProcessName)).ToList();
                 bool allExited  = previous.Count > 0 && currentSet.Count == 0;
                 bool someExited = previous.Count > 0 && previous.Count != currentSet.Count && currentSet.Count > 0;
@@ -507,6 +504,25 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
     {
         IsGameRunning = true;
 
+        ApplyOptimizations();
+
+        UpdateActiveStatus(games);
+        GameDetected?.Invoke(games, BuildOptimizationSummary());
+
+        if (_config.AutoMinimizeOnGame)
+            EnterMonitorRequested?.Invoke();
+
+        // Retry once after 5 s: the game process may still be initialising at first
+        // detection, causing the first apply to be silently ignored.
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(5000, _cts.Token);
+            ApplyOptimizations();
+        }, _cts.Token);
+    }
+
+    private void ApplyOptimizations()
+    {
         if (_config.ThrottleSGuard)
             ProcessOptimizer.ThrottleSGuard();
 
@@ -521,12 +537,6 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
 
         if (_config.TimerResolution)
             EnableTimerResolutionInternal();
-
-        UpdateActiveStatus(games);
-        GameDetected?.Invoke(games, BuildOptimizationSummary());
-
-        if (_config.AutoMinimizeOnGame)
-            EnterMonitorRequested?.Invoke();
     }
 
     private void OnAllGamesExited(HashSet<string> exitedProcessNames)
