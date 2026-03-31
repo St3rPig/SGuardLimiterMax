@@ -1,6 +1,8 @@
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Forms;
+using System.Windows.Interop;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
 using SGuardLimiterMax.Models;
@@ -12,6 +14,10 @@ namespace SGuardLimiterMax
     {
         private NotifyIcon?                _trayIcon;
         private ViewModels.MainViewModel? _vm;
+        private bool                       _trayIconShouldBeVisible;
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        private static extern uint RegisterWindowMessage(string message);
 
         public MainWindow()
         {
@@ -26,21 +32,42 @@ namespace SGuardLimiterMax
 
             InitializeTrayIcon();
 
+            // Ensure the HWND exists even when the window is never shown (autostart),
+            // so we can receive WM_TASKBARCREATED and re-register the tray icon if
+            // Explorer restarts or wasn't ready when the icon was first created.
+            var helper = new WindowInteropHelper(this);
+            helper.EnsureHandle();
+            HwndSource.FromHwnd(helper.Handle)?.AddHook(WndProc);
+
             // When launched via --autostart, App.OnStartup() will NOT call Show() on
-            // this window, so we never flash a UI. Just make the tray icon visible here
-            // and post a balloon notification once the message loop is running.
+            // this window, so we never flash a UI. Defer making the tray icon visible
+            // until the message loop is idle — by then Explorer's shell is ready.
             if (App.IsAutoStart && _trayIcon != null)
             {
-                _trayIcon.Visible = true;
+                _trayIconShouldBeVisible = true;
                 Dispatcher.BeginInvoke(
                     System.Windows.Threading.DispatcherPriority.ApplicationIdle,
                     () =>
                     {
-                        if (_vm?.ShowNotifications == true)
-                            _trayIcon.ShowBalloonTip(3000, "SGuard Limiter Max",
-                                "已进入监测模式，将在检测到游戏时自动优化。", ToolTipIcon.None);
+                        if (_trayIcon != null)
+                        {
+                            _trayIcon.Visible = true;
+                            if (_vm?.ShowNotifications == true)
+                                _trayIcon.ShowBalloonTip(3000, "SGuard Limiter Max",
+                                    "已进入监测模式，将在检测到游戏时自动优化。", ToolTipIcon.None);
+                        }
                     });
             }
+        }
+
+        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            // WM_TASKBARCREATED is broadcast when Explorer's shell restarts (or finishes
+            // loading on boot). Re-register the tray icon so it reappears automatically.
+            if (msg == (int)RegisterWindowMessage("TaskbarCreated") && _trayIconShouldBeVisible && _trayIcon != null)
+                _trayIcon.Visible = true;
+
+            return IntPtr.Zero;
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
@@ -189,6 +216,7 @@ namespace SGuardLimiterMax
         {
             bool wasVisible = this.IsVisible;
             this.Hide();
+            _trayIconShouldBeVisible = true;
             if (_trayIcon != null)
             {
                 _trayIcon.Visible = true;
@@ -203,6 +231,7 @@ namespace SGuardLimiterMax
             this.Show();
             this.WindowState = WindowState.Normal;
             this.Activate();
+            _trayIconShouldBeVisible = false;
             if (_trayIcon != null)
             {
                 _trayIcon.Visible = false;
