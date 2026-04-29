@@ -199,7 +199,7 @@
                             <TextBlock Text="{TemplateBinding Content}"
                                        Foreground="{TemplateBinding Foreground}"
                                        HorizontalAlignment="Center"
-                                       LetterSpacing="2"/>
+                                       />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -290,14 +290,13 @@
                 <StackPanel Grid.Row="0" Margin="16,22,16,0"
                             MouseLeftButtonDown="Window_MouseLeftButtonDown">
                     <TextBlock FontFamily="Georgia" FontSize="20" LineHeight="19"
-                               Foreground="{DynamicResource LeftBarForeground}"
-                               LetterSpacing="1">
+                               Foreground="{DynamicResource LeftBarForeground}">
                         SGUARD<LineBreak/>LIMITER<LineBreak/>MAX
                     </TextBlock>
                     <Border Width="20" Height="2" Margin="0,12,0,0"
                             Background="{DynamicResource LeftBarForeground}"
                             Opacity="0.3"/>
-                    <TextBlock FontFamily="Segoe UI" FontSize="7" LetterSpacing="2"
+                    <TextBlock FontFamily="Segoe UI" FontSize="7"
                                Foreground="{DynamicResource LeftBarForeground}"
                                Opacity="0.45" Margin="0,6,0,0">
                         PERFORMANCE<LineBreak/>UTILITY v1.1
@@ -306,7 +305,7 @@
 
                 <!-- Status -->
                 <StackPanel Grid.Row="1" Margin="16,30,16,0">
-                    <TextBlock FontFamily="Segoe UI" FontSize="7" LetterSpacing="2"
+                    <TextBlock FontFamily="Segoe UI" FontSize="7"
                                Foreground="{DynamicResource LeftBarForeground}"
                                Opacity="0.35" Margin="0,0,0,4">
                         STATUS
@@ -323,7 +322,7 @@
                             </Style>
                         </Ellipse.Style>
                     </Ellipse>
-                    <TextBlock FontFamily="Segoe UI" FontSize="11" LetterSpacing="1"
+                    <TextBlock FontFamily="Segoe UI" FontSize="11"
                                Foreground="{DynamicResource LeftBarForeground}"
                                Opacity="0.5">
                         <TextBlock.Style>
@@ -735,7 +734,7 @@
                                 Foreground="{DynamicResource TextPrimary}"
                                 Background="Transparent" BorderBrush="{DynamicResource TextPrimary}"
                                 BorderThickness="1.5" Padding="16,8"
-                                Cursor="Hand" LetterSpacing="1">
+                                Cursor="Hand">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <Border x:Name="Bd" Background="Transparent"

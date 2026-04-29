@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using Microsoft.Win32;
+using Application = System.Windows.Application;
 
 namespace SGuardLimiterMax.Services
 {
