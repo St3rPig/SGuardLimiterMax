@@ -2,6 +2,7 @@ using System.Threading;
 using System.Windows;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
+using SGuardLimiterMax.Services;
 
 namespace SGuardLimiterMax;
 
@@ -13,6 +14,8 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        ThemeManager.Initialize();
+
         _mutex = new Mutex(true, "SGuardLimiterMax_SingleInstance", out bool isNewInstance);
         if (!isNewInstance)
         {
