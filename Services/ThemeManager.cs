@@ -18,6 +18,12 @@ namespace SGuardLimiterMax.Services
             ApplyTheme(IsDarkTheme);
         }
 
+        public static void ToggleTheme()
+        {
+            IsDarkTheme = !IsDarkTheme;
+            ApplyTheme(IsDarkTheme);
+        }
+
         private static bool DetectSystemTheme()
         {
             try

@@ -55,7 +55,7 @@ namespace SGuardLimiterMax
                         {
                             _trayIcon.Visible = true;
                             if (_vm?.ShowNotifications == true)
-                                _trayIcon.ShowBalloonTip(3000, "SGuard Limiter Max",
+                                _trayIcon.ShowBalloonTip(3000, "SGuard Limiter",
                                     "已进入监测模式，将在检测到游戏时自动优化。", ToolTipIcon.None);
                         }
                     });
@@ -85,6 +85,9 @@ namespace SGuardLimiterMax
                 this.DragMove();
         }
 
+        private void BtnToggleTheme_Click(object sender, RoutedEventArgs e)
+            => ThemeManager.ToggleTheme();
+
         private static System.Drawing.Icon LoadTrayIcon()
         {
             try
@@ -107,7 +110,7 @@ namespace SGuardLimiterMax
             _trayIcon = new NotifyIcon
             {
                 Icon    = LoadTrayIcon(),
-                Text    = "SGuard Limiter Max",
+                Text    = "SGuard Limiter",
                 Visible = false
             };
 
@@ -126,7 +129,7 @@ namespace SGuardLimiterMax
             if (_trayIcon == null) return;
 
             string names = string.Join(" · ", System.Linq.Enumerable.Select(games, g => g.DisplayName));
-            _trayIcon.Text = $"SGuard Limiter Max · {names}";
+            _trayIcon.Text = $"SGuard Limiter · {names}";
 
             if (_vm?.ShowNotifications == true)
             {
@@ -147,9 +150,9 @@ namespace SGuardLimiterMax
         private void OnGameExited(string message)
         {
             if (_trayIcon == null) return;
-            _trayIcon.Text = "SGuard Limiter Max";
+            _trayIcon.Text = "SGuard Limiter";
             if (_vm?.ShowNotifications == true)
-                _trayIcon.ShowBalloonTip(3000, "SGuard Limiter Max", message, ToolTipIcon.None);
+                _trayIcon.ShowBalloonTip(3000, "SGuard Limiter", message, ToolTipIcon.None);
         }
 
         private void OnUpdateAvailable(SGuardLimiterMax.Services.UpdateInfo info)
@@ -249,7 +252,7 @@ namespace SGuardLimiterMax
             {
                 _trayIcon.Visible = true;
                 if (wasVisible && _vm?.ShowNotifications == true)
-                    _trayIcon.ShowBalloonTip(2000, "SGuard Limiter Max",
+                    _trayIcon.ShowBalloonTip(2000, "SGuard Limiter",
                         "已最小化至托盘，程序将在后台持续监控。", ToolTipIcon.None);
             }
         }
@@ -263,7 +266,7 @@ namespace SGuardLimiterMax
             if (_trayIcon != null)
             {
                 _trayIcon.Visible = false;
-                _trayIcon.Text    = "SGuard Limiter Max";
+                _trayIcon.Text    = "SGuard Limiter";
             }
         }
 

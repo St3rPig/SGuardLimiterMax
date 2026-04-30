@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 using Application = System.Windows.Application;
@@ -10,6 +11,12 @@ public partial class App : Application
 {
     private static Mutex? _mutex;
 
+    [DllImport("shell32.dll")]
+    private static extern void SHChangeNotify(uint wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);
+
+    private const uint SHCNE_ASSOCCHANGED = 0x08000000;
+    private const uint SHCNF_IDLIST = 0x0000;
+
     public static bool IsAutoStart { get; private set; }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -19,7 +26,7 @@ public partial class App : Application
         _mutex = new Mutex(true, "SGuardLimiterMax_SingleInstance", out bool isNewInstance);
         if (!isNewInstance)
         {
-            MessageBox.Show("SGuard Limiter Max 已在运行中。", "提示",
+            MessageBox.Show("SGuard Limiter 已在运行中。", "提示",
                 MessageBoxButton.OK, MessageBoxImage.Information);
             Shutdown();
             return;
@@ -32,7 +39,7 @@ public partial class App : Application
 
         DispatcherUnhandledException += (_, ex) =>
         {
-            MessageBox.Show(ex.Exception.Message, "SGuard Limiter Max — 意外错误",
+            MessageBox.Show(ex.Exception.Message, "SGuard Limiter — 意外错误",
                 MessageBoxButton.OK, MessageBoxImage.Error);
             ex.Handled = true;
         };
@@ -43,6 +50,9 @@ public partial class App : Application
         MainWindow = window;
         if (!IsAutoStart)
             window.Show();
+
+        // Notify Windows shell to refresh icon cache for this app
+        SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, IntPtr.Zero, IntPtr.Zero);
     }
 
     protected override void OnExit(ExitEventArgs e)

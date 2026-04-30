@@ -21,8 +21,8 @@
     <!-- Assembly metadata -->
     <Version>1.1.2</Version>
     <Company>Open Source</Company>
-    <Product>SGuard Limiter Max</Product>
-    <Description>Lightweight process optimizer and power manager for games using SGuard anti-cheat.</Description>
+    <Product>SGuard Limiter</Product>
+    <Description>SGuard 游戏进程优化与电源管理工具</Description>
   </PropertyGroup>
 
   <!-- System Tray icon resource -->
