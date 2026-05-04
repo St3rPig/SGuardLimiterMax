@@ -41,6 +41,9 @@
     <SolidColorBrush x:Key="CarvedLight" Color="#F6F2EC" Opacity="0.15"/>
     <SolidColorBrush x:Key="CarvedDark" Color="#000000" Opacity="0.5"/>
 
+    <!-- ── Dialog ── -->
+    <SolidColorBrush x:Key="DialogBackground" Color="#1C1812"/>
+
     <!-- ── Section label ── -->
     <SolidColorBrush x:Key="SectionLabel" Color="#B0A090"/>
     <SolidColorBrush x:Key="SectionLabelDark" Color="#8A8070"/>

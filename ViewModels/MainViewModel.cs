@@ -359,6 +359,12 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
     /// <summary>Persists the current toggle state to disk.</summary>
     public void SaveConfig() => ConfigManager.Save(_config);
 
+    public void SaveThemePreference(bool dark)
+    {
+        _config.DarkTheme = dark;
+        ConfigManager.Save(_config);
+    }
+
     /// <summary>
     /// Immediately switches to the specified power plan.
     /// Pass <c>null</c> to auto-select the best available performance plan.

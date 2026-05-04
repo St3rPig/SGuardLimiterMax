@@ -12,9 +12,9 @@ namespace SGuardLimiterMax.Services
 
         public static bool IsDarkTheme { get; private set; }
 
-        public static void Initialize()
+        public static void Initialize(bool? preference = null)
         {
-            IsDarkTheme = DetectSystemTheme();
+            IsDarkTheme = preference ?? DetectSystemTheme();
             ApplyTheme(IsDarkTheme);
         }
 

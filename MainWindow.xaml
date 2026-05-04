@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         Title="SGuard Limiter" Icon="/Assets/SGuard_Limiter_Max.png"
-        Height="740" Width="960" MinWidth="820" MinHeight="620"
+        Height="620" Width="820" MinWidth="820" MinHeight="620"
         WindowStyle="None" AllowsTransparency="False"
         Background="{DynamicResource PageBackground}"
         WindowStartupLocation="CenterScreen" ResizeMode="CanResize">
@@ -30,7 +30,7 @@
         <!-- ═══ Section Label ═══ -->
         <Style x:Key="SectionLabelStyle" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Segoe UI"/>
-            <Setter Property="FontSize" Value="9"/>
+            <Setter Property="FontSize" Value="8"/>
             <Setter Property="FontWeight" Value="Regular"/>
             <Setter Property="Foreground" Value="{DynamicResource SectionLabel}"/>
             <Setter Property="Margin" Value="0,0,0,10"/>
@@ -73,7 +73,7 @@
             </Setter>
         </Style>
 
-        <!-- ═══ Small Square Checkbox (runtime items, 14px) ═══ -->
+        <!-- ═══ Small Square Checkbox (runtime items, 16px) ═══ -->
         <Style x:Key="SmallSquareCheck" TargetType="CheckBox">
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
@@ -84,7 +84,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="CheckBox">
                         <StackPanel Orientation="Horizontal">
-                            <Border x:Name="Chk" Width="14" Height="14"
+                            <Border x:Name="Chk" Width="16" Height="16"
                                     Background="Transparent"
                                     BorderBrush="{DynamicResource CheckBorder}"
                                     BorderThickness="1.5" Margin="0,0,10,0"
@@ -112,7 +112,7 @@
         <!-- ═══ Inline Selector (Power Plan / Timer) ═══ -->
         <Style x:Key="InlineCombo" TargetType="ComboBox">
             <Setter Property="FontFamily" Value="Segoe UI"/>
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -122,21 +122,24 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
                         <Grid>
-                            <Border Background="Transparent" BorderThickness="0"
-                                    BorderBrush="Transparent">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" VerticalAlignment="Center"
-                                               Text="{TemplateBinding SelectionBoxItem}"
-                                               TextDecorations="Underline"
-                                               Foreground="{DynamicResource TextSecondary}"/>
-                                    <TextBlock Grid.Column="1" Text="▾" FontSize="9"
-                                               Foreground="{DynamicResource TextSecondary}"
-                                               VerticalAlignment="Center" Margin="2,0,0,0"/>
-                                </Grid>
+                            <Border x:Name="Bd" Background="Transparent"
+                                    BorderThickness="0" BorderBrush="Transparent">
+                                <Border Background="{DynamicResource TagBackground}" CornerRadius="4"
+                                        Padding="6,3" VerticalAlignment="Center">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" VerticalAlignment="Center"
+                                                   Text="{TemplateBinding SelectionBoxItem}"
+                                                   TextDecorations="Underline"
+                                                   Foreground="{TemplateBinding Foreground}"/>
+                                        <TextBlock Grid.Column="1" Text=" ▾" FontSize="10"
+                                                   Foreground="{DynamicResource TextPrimary}"
+                                                   VerticalAlignment="Center"/>
+                                    </Grid>
+                                </Border>
                             </Border>
                             <Popup x:Name="PART_Popup" IsOpen="{TemplateBinding IsDropDownOpen}"
                                    AllowsTransparency="True" Focusable="False"
@@ -147,10 +150,16 @@
                                     <ScrollViewer><ItemsPresenter/></ScrollViewer>
                                 </Border>
                             </Popup>
-                            <ToggleButton Background="Transparent" BorderThickness="0"
+                            <ToggleButton x:Name="Toggle" Background="Transparent"
+                                          BorderThickness="0"
                                           IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
                                           Focusable="False"/>
                         </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger SourceName="Toggle" Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -160,7 +169,7 @@
                         <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
                         <Setter Property="Background" Value="Transparent"/>
                         <Setter Property="Padding" Value="10,5"/>
-                        <Setter Property="FontSize" Value="11"/>
+                        <Setter Property="FontSize" Value="13"/>
                         <Setter Property="FontFamily" Value="Segoe UI"/>
                         <Setter Property="Template">
                             <Setter.Value>
@@ -188,17 +197,22 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
-            <Setter Property="FontSize" Value="10"/>
-            <Setter Property="Foreground" Value="{DynamicResource TextMuted}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <TextBlock Text="{TemplateBinding Content}"
+                        <TextBlock x:Name="Tb" Text="{TemplateBinding Content}"
                                    Foreground="{TemplateBinding Foreground}"
                                    VerticalAlignment="Center"
                                    TextDecorations="Underline"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Tb" Property="Opacity" Value="0.6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -209,7 +223,7 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="{DynamicResource LeftBarForeground}"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Template">
@@ -242,7 +256,7 @@
             <Setter Property="Height" Value="28"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -266,7 +280,7 @@
             <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource InputUnderline}"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="Padding" Value="4,4"/>
             <Setter Property="CaretBrush" Value="{DynamicResource TextPrimary}"/>
@@ -297,7 +311,7 @@
     <!-- ════════════════════════════════════════════════════════════════════ -->
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="190"/>
+            <ColumnDefinition Width="227"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
@@ -320,7 +334,7 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0">
-                        <TextBlock FontFamily="Georgia" FontSize="24" LineHeight="22"
+                        <TextBlock FontFamily="Georgia" FontSize="21" LineHeight="20"
                                    Foreground="{DynamicResource LeftBarForeground}">
                             SGUARD<LineBreak/>LIMITER
                         </TextBlock>
@@ -437,7 +451,7 @@
                 <StackPanel Grid.Row="3" Margin="0,0,0,14">
                     <Button Content="◐" Click="BtnToggleTheme_Click"
                             HorizontalAlignment="Center" Margin="0,0,0,10"
-                            FontSize="16"
+                            FontSize="13"
                             Foreground="{DynamicResource LeftBarForeground}"
                             Background="Transparent" BorderThickness="0"
                             Cursor="Hand">
@@ -466,11 +480,11 @@
                         </Button.Style>
                     </Button>
                     <Grid>
-                        <TextBlock FontFamily="Georgia" FontSize="15"
+                        <TextBlock FontFamily="Georgia" FontSize="13"
                                    Foreground="{DynamicResource CarvedDark}"
                                    Text="Nº 001" HorizontalAlignment="Center"
                                    Margin="0,1,0,0"/>
-                        <TextBlock FontFamily="Georgia" FontSize="15"
+                        <TextBlock FontFamily="Georgia" FontSize="13"
                                    Foreground="{DynamicResource CarvedLight}"
                                    Text="Nº 001" HorizontalAlignment="Center"/>
                     </Grid>
@@ -532,7 +546,7 @@
                                            Foreground="{DynamicResource TextPrimary}"
                                            Text="限制 SGuard"/>
                                 <TextBlock Grid.Column="2" VerticalAlignment="Center"
-                                           FontFamily="Segoe UI" FontSize="10"
+                                           FontFamily="Segoe UI" FontSize="8"
                                            Foreground="{DynamicResource TextMuted}"
                                            Text="空闲 · 末核"/>
                             </Grid>
@@ -554,7 +568,7 @@
                                            Foreground="{DynamicResource TextPrimary}"
                                            Text="提升游戏优先级"/>
                                 <TextBlock Grid.Column="2" VerticalAlignment="Center"
-                                           FontFamily="Segoe UI" FontSize="10"
+                                           FontFamily="Segoe UI" FontSize="8"
                                            Foreground="{DynamicResource TextMuted}"
                                            Text="高优先级"/>
                             </Grid>
@@ -576,7 +590,7 @@
                                            Foreground="{DynamicResource TextPrimary}"
                                            Text="解绑 CPU 0"/>
                                 <TextBlock Grid.Column="2" VerticalAlignment="Center"
-                                           FontFamily="Segoe UI" FontSize="10"
+                                           FontFamily="Segoe UI" FontSize="8"
                                            Foreground="{DynamicResource TextMuted}"
                                            Text="关闭"/>
                             </Grid>
@@ -629,7 +643,7 @@
                                            Foreground="{DynamicResource TextPrimary}"
                                            Text="刷新 DNS"/>
                                 <TextBlock Grid.Column="2" VerticalAlignment="Center"
-                                           FontFamily="Segoe UI" FontSize="10"
+                                           FontFamily="Segoe UI" FontSize="8"
                                            Foreground="{DynamicResource TextMuted}"
                                            Text="检测时"/>
                             </Grid>
@@ -680,10 +694,10 @@
                                             Padding="8,4" Margin="0,0,6,6">
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI" FontSize="11"
+                                                       FontFamily="Segoe UI" FontSize="13"
                                                        Foreground="{DynamicResource TextPrimary}"/>
                                             <!-- Priority dot -->
-                                            <Border Width="8" Height="8" Margin="6,0,0,0"
+                                            <Border Width="10" Height="10" Margin="6,0,0,0"
                                                     VerticalAlignment="Center">
                                                 <Border.Style>
                                                     <Style TargetType="Border">
@@ -699,7 +713,7 @@
                                                 </Border.Style>
                                             </Border>
                                             <!-- CPU0 dot -->
-                                            <Border Width="8" Height="8" Margin="3,0,0,0"
+                                            <Border Width="10" Height="10" Margin="3,0,0,0"
                                                     VerticalAlignment="Center">
                                                 <Border.Style>
                                                     <Style TargetType="Border">
@@ -728,7 +742,7 @@
                         </ItemsControl>
 
                         <!-- Empty state -->
-                        <TextBlock FontFamily="Segoe UI" FontSize="11"
+                        <TextBlock FontFamily="Segoe UI" FontSize="13"
                                    Foreground="{DynamicResource TextDisabled}"
                                    Margin="0,0,0,8" Text="暂无自定义进程，请在下方添加。">
                             <TextBlock.Style>
@@ -762,7 +776,7 @@
                                     </Style>
                                 </CheckBox.Style>
                             </CheckBox>
-                            <TextBlock Text="高优先" FontFamily="Segoe UI" FontSize="10"
+                            <TextBlock Text="高优先" FontFamily="Segoe UI" FontSize="8"
                                        Foreground="{DynamicResource TextSecondary}"
                                        VerticalAlignment="Center" Margin="0,0,8,0"/>
                             <CheckBox x:Name="ChkUnbindCpu0"
@@ -776,11 +790,11 @@
                                     </Style>
                                 </CheckBox.Style>
                             </CheckBox>
-                            <TextBlock Text="CPU0" FontFamily="Segoe UI" FontSize="10"
+                            <TextBlock Text="CPU0" FontFamily="Segoe UI" FontSize="8"
                                        Foreground="{DynamicResource TextSecondary}"
                                        VerticalAlignment="Center" Margin="0,0,8,0"/>
                             <Button Content="添加" Style="{StaticResource TextLink}"
-                                    Click="BtnAddGame_Click" FontSize="11"/>
+                                    Click="BtnAddGame_Click" FontSize="13"/>
                         </StackPanel>
                     </StackPanel>
 
@@ -823,8 +837,8 @@
 
                             <!-- Giant status text -->
                             <StackPanel Grid.Column="0" VerticalAlignment="Bottom">
-                                <TextBlock FontFamily="Georgia" FontSize="48" FontWeight="Light"
-                                           LineHeight="42"
+                                <TextBlock FontFamily="Georgia" FontSize="55" FontWeight="Light"
+                                           LineHeight="48"
                                            Foreground="{DynamicResource StatusGiantText}">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
@@ -837,7 +851,7 @@
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
-                                <TextBlock FontFamily="Segoe UI" FontSize="10"
+                                <TextBlock FontFamily="Segoe UI" FontSize="8"
                                            Foreground="{DynamicResource TextMuted}"
                                            Text="{Binding StatusText}"
                                            TextTrimming="CharacterEllipsis"/>
@@ -846,7 +860,7 @@
                             <!-- Apply Now -->
                             <Button Grid.Column="1" VerticalAlignment="Bottom"
                                     Content="立即应用" Click="BtnApplyNow_Click"
-                                    FontFamily="Segoe UI" FontSize="12"
+                                    FontFamily="Segoe UI" FontSize="13"
                                     Foreground="{DynamicResource TextPrimary}"
                                     Background="Transparent" BorderBrush="{DynamicResource TextPrimary}"
                                     BorderThickness="1.5" Padding="18,10"

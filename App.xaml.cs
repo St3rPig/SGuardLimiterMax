@@ -21,7 +21,8 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
-        ThemeManager.Initialize();
+        var config = ConfigManager.Load();
+        ThemeManager.Initialize(config.DarkTheme);
 
         _mutex = new Mutex(true, "SGuardLimiterMax_SingleInstance", out bool isNewInstance);
         if (!isNewInstance)

@@ -4,9 +4,10 @@ using System.Windows.Input;
 using System.Windows.Forms;
 using System.Windows.Interop;
 using Application = System.Windows.Application;
-using MessageBox = System.Windows.MessageBox;
+
 using SGuardLimiterMax.Models;
 using SGuardLimiterMax.Services;
+using SGuardLimiterMax.Views;
 
 namespace SGuardLimiterMax
 {
@@ -86,7 +87,10 @@ namespace SGuardLimiterMax
         }
 
         private void BtnToggleTheme_Click(object sender, RoutedEventArgs e)
-            => ThemeManager.ToggleTheme();
+        {
+            ThemeManager.ToggleTheme();
+            _vm?.SaveThemePreference(ThemeManager.IsDarkTheme);
+        }
 
         private static System.Drawing.Icon LoadTrayIcon()
         {
@@ -193,7 +197,7 @@ namespace SGuardLimiterMax
         {
             if (_vm == null) return;
             string summary = _vm.ApplyNow();
-            MessageBox.Show(summary, "执行完成", MessageBoxButton.OK, MessageBoxImage.None);
+            new ResultDialog(summary) { Owner = this }.ShowDialog();
         }
 
         private void BtnEnterMonitor_Click(object sender, RoutedEventArgs e)
@@ -222,7 +226,7 @@ namespace SGuardLimiterMax
             string processName = TxtProcessName.Text.Trim();
             if (string.IsNullOrEmpty(processName))
             {
-                MessageBox.Show("请填写进程名。", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                new ResultDialog("请填写进程名。") { Owner = this }.ShowDialog();
                 return;
             }
 

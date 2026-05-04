@@ -17,7 +17,7 @@
     <SolidColorBrush x:Key="DividerDark" Color="#2A2622"/>
 
     <!-- ── Checkbox ── -->
-    <SolidColorBrush x:Key="CheckFill" Color="#F0ECE4"/>
+    <SolidColorBrush x:Key="CheckFill" Color="#D08040"/>
     <SolidColorBrush x:Key="CheckBorder" Color="#4A4440"/>
     <SolidColorBrush x:Key="CheckBorderDisabled" Color="#4A4440"/>
 
@@ -40,6 +40,9 @@
     <!-- ── Carved mark ── -->
     <SolidColorBrush x:Key="CarvedLight" Color="#1A1816" Opacity="0.15"/>
     <SolidColorBrush x:Key="CarvedDark" Color="#F0ECE4" Opacity="0.04"/>
+
+    <!-- ── Dialog ── -->
+    <SolidColorBrush x:Key="DialogBackground" Color="#E8E0D2"/>
 
     <!-- ── Section label ── -->
     <SolidColorBrush x:Key="SectionLabel" Color="#8A8070"/>

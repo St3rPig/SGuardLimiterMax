@@ -54,6 +54,9 @@ public class AppConfig
     /// <summary>Restore the system timer resolution when the app exits or a game session ends. Default true.</summary>
     public bool RestoreTimerOnExit { get; set; } = true;
 
+    /// <summary>Override system theme: true = dark, false = light, null = follow system.</summary>
+    public bool? DarkTheme { get; set; } = null;
+
     /// <summary>User-defined game processes to monitor and optimize alongside the built-in list.</summary>
     public List<CustomGameEntry> CustomGames { get; set; } = [];
 }
