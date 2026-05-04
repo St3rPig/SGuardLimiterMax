@@ -7,9 +7,9 @@
 **自动检测游戏启动，一键完成系统级性能调优。**
 A lightweight Windows utility that automatically applies OS-level performance optimizations when a monitored game is detected.
 
-| 亮色主题 | 暗色主题 |
-|:---:|:---:|
-| ![亮色主题](Assets/亮版本.png) | ![暗色主题](Assets/暗版本.png) |
+![亮色主题](Assets/screenshot-light.png)
+
+![暗色主题](Assets/screenshot-dark.png)
 
 ---
 
