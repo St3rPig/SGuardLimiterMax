@@ -4,9 +4,10 @@ using System.Windows.Input;
 using System.Windows.Forms;
 using System.Windows.Interop;
 using Application = System.Windows.Application;
-using MessageBox = System.Windows.MessageBox;
+
 using SGuardLimiterMax.Models;
 using SGuardLimiterMax.Services;
+using SGuardLimiterMax.Views;
 
 namespace SGuardLimiterMax
 {
@@ -55,7 +56,7 @@ namespace SGuardLimiterMax
                         {
                             _trayIcon.Visible = true;
                             if (_vm?.ShowNotifications == true)
-                                _trayIcon.ShowBalloonTip(3000, "SGuard Limiter Max",
+                                _trayIcon.ShowBalloonTip(3000, "SGuard Limiter",
                                     "已进入监测模式，将在检测到游戏时自动优化。", ToolTipIcon.None);
                         }
                     });
@@ -85,6 +86,12 @@ namespace SGuardLimiterMax
                 this.DragMove();
         }
 
+        private void BtnToggleTheme_Click(object sender, RoutedEventArgs e)
+        {
+            ThemeManager.ToggleTheme();
+            _vm?.SaveThemePreference(ThemeManager.IsDarkTheme);
+        }
+
         private static System.Drawing.Icon LoadTrayIcon()
         {
             try
@@ -107,7 +114,7 @@ namespace SGuardLimiterMax
             _trayIcon = new NotifyIcon
             {
                 Icon    = LoadTrayIcon(),
-                Text    = "SGuard Limiter Max",
+                Text    = "SGuard Limiter",
                 Visible = false
             };
 
@@ -126,7 +133,7 @@ namespace SGuardLimiterMax
             if (_trayIcon == null) return;
 
             string names = string.Join(" · ", System.Linq.Enumerable.Select(games, g => g.DisplayName));
-            _trayIcon.Text = $"SGuard Limiter Max · {names}";
+            _trayIcon.Text = $"SGuard Limiter · {names}";
 
             if (_vm?.ShowNotifications == true)
             {
@@ -147,9 +154,9 @@ namespace SGuardLimiterMax
         private void OnGameExited(string message)
         {
             if (_trayIcon == null) return;
-            _trayIcon.Text = "SGuard Limiter Max";
+            _trayIcon.Text = "SGuard Limiter";
             if (_vm?.ShowNotifications == true)
-                _trayIcon.ShowBalloonTip(3000, "SGuard Limiter Max", message, ToolTipIcon.None);
+                _trayIcon.ShowBalloonTip(3000, "SGuard Limiter", message, ToolTipIcon.None);
         }
 
         private void OnUpdateAvailable(SGuardLimiterMax.Services.UpdateInfo info)
@@ -190,7 +197,7 @@ namespace SGuardLimiterMax
         {
             if (_vm == null) return;
             string summary = _vm.ApplyNow();
-            MessageBox.Show(summary, "执行完成", MessageBoxButton.OK, MessageBoxImage.None);
+            new ResultDialog(summary) { Owner = this }.ShowDialog();
         }
 
         private void BtnEnterMonitor_Click(object sender, RoutedEventArgs e)
@@ -219,7 +226,7 @@ namespace SGuardLimiterMax
             string processName = TxtProcessName.Text.Trim();
             if (string.IsNullOrEmpty(processName))
             {
-                MessageBox.Show("请填写进程名。", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                new ResultDialog("请填写进程名。") { Owner = this }.ShowDialog();
                 return;
             }
 
@@ -249,7 +256,7 @@ namespace SGuardLimiterMax
             {
                 _trayIcon.Visible = true;
                 if (wasVisible && _vm?.ShowNotifications == true)
-                    _trayIcon.ShowBalloonTip(2000, "SGuard Limiter Max",
+                    _trayIcon.ShowBalloonTip(2000, "SGuard Limiter",
                         "已最小化至托盘，程序将在后台持续监控。", ToolTipIcon.None);
             }
         }
@@ -263,7 +270,7 @@ namespace SGuardLimiterMax
             if (_trayIcon != null)
             {
                 _trayIcon.Visible = false;
-                _trayIcon.Text    = "SGuard Limiter Max";
+                _trayIcon.Text    = "SGuard Limiter";
             }
         }
 

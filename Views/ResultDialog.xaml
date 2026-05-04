@@ -1,0 +1,81 @@
+<Window x:Class="SGuardLimiterMax.Views.ResultDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SGuard Limiter" Icon="/Assets/SGuard_Limiter_Max.png"
+        Width="360" SizeToContent="Height" MinHeight="220" MaxHeight="500"
+        ResizeMode="NoResize"
+        WindowStyle="None" AllowsTransparency="False"
+        Background="{DynamicResource DialogBackground}"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+
+    <!-- Full-surface drag -->
+    <Border Background="Transparent"
+            MouseLeftButtonDown="Window_MouseLeftButtonDown"
+            BorderBrush="{DynamicResource ArmBorder}" BorderThickness="1"
+            Margin="1" SnapsToDevicePixels="True"
+            ClipToBounds="True">
+        <Grid>
+            <!-- ═══ Single focal point: oversized circle ═══ -->
+            <Ellipse Width="180" Height="180"
+                     Fill="{DynamicResource LeftBarForeground}" Opacity="0.06"
+                     HorizontalAlignment="Right" VerticalAlignment="Top"
+                     Margin="0,-60,-50,0"/>
+
+            <Grid Margin="34,32,34,26">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Title -->
+                <TextBlock Grid.Row="0" Text="执行完成"
+                           FontFamily="Georgia" FontSize="21"
+                           Foreground="{DynamicResource LeftBarForeground}"
+                           Margin="0,0,0,12"/>
+
+                <!-- Thin rule -->
+                <Border Grid.Row="1" Width="20" Height="1"
+                        Background="{DynamicResource LeftBarForeground}" Opacity="0.3"
+                        HorizontalAlignment="Left" Margin="0,0,0,16"/>
+
+                <!-- Message -->
+                <TextBlock Grid.Row="2" x:Name="TxtSummary"
+                           FontFamily="Segoe UI" FontSize="13"
+                           Foreground="{DynamicResource LeftBarForeground}" Opacity="0.65"
+                           TextWrapping="Wrap" LineHeight="22"
+                           Margin="0,0,0,18"/>
+
+                <!-- Confirm -->
+                <Button Grid.Row="3" Content="确认" Click="BtnConfirm_Click"
+                        HorizontalAlignment="Right"
+                        FontFamily="Segoe UI" FontSize="13"
+                        Foreground="{DynamicResource LeftBarForeground}"
+                        Background="Transparent" BorderBrush="{DynamicResource LeftBarForeground}"
+                        BorderThickness="1" Padding="16,5" Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bd" Background="Transparent"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bd" Property="Background"
+                                            Value="{DynamicResource LeftBarForeground}"/>
+                                    <Setter Property="Foreground"
+                                            Value="{DynamicResource LeftBarBackground}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

@@ -1,0 +1,1092 @@
+# Swiss Poster UI Redesign — Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Rewrite MainWindow.xaml in Swiss Poster / International Style — warm off-white base, pure black left bar, square checkboxes, dual light/dark theme support. Zero C# logic changes.
+
+**Architecture:** Two new ResourceDictionary files (LightTheme.xaml, DarkTheme.xaml) define all themed brushes. ThemeManager.cs detects Windows system theme and merges the correct dictionary at startup. MainWindow.xaml is rewritten from scratch with new styles and layout, preserving every binding path, event handler name, and named element from the original.
+
+**Tech Stack:** WPF XAML, .NET 8, no new NuGet dependencies
+
+**Spec:** `docs/superpowers/specs/2026-04-29-swiss-poster-redesign.md`
+
+---
+
+## Preserved Contract
+
+These MUST remain identical to the original or code-behind will break:
+
+**Event handlers:** `Window_MouseLeftButtonDown`, `BtnEnterMonitor_Click`, `BtnMinimize_Click`, `BtnClose_Click`, `BtnSaveConfig_Click`, `BtnApplyNow_Click`, `BtnApplyPlan_Click`, `BtnRefreshPlans_Click`, `BtnApplyTimer_Click`, `BtnAddGame_Click`, `BtnRemoveGame_Click`
+
+**Named elements:** `TxtProcessName`, `TxtDisplayName`, `ChkBoostPriority`, `ChkUnbindCpu0`
+
+**Binding paths:** `ThrottleSGuard`, `BoostGamePriority`, `UnbindCPU`, `OptimizePower`, `FlushDNS`, `TimerResolution`, `AutoMinimizeOnGame`, `ExitWithGame`, `AutoStart`, `ShowNotifications`, `RestorePowerOnExit`, `RestoreTimerOnExit`, `ActivePowerPlanName`, `AvailablePowerPlans`, `SelectedTargetPlan`, `ActiveTimerResolutionText`, `TimerResolutionOptions`, `SelectedTimerResolutionOption`, `CustomGames`, `CustomGames.Count`, `DisplayName`, `ProcessName`, `BoostPriority`, `UnbindCpu0`, `IsGameRunning`, `StatusText`
+
+---
+
+### Task 1: Create Resources/LightTheme.xaml
+
+**Files:**
+- Create: `Resources/LightTheme.xaml`
+
+- [ ] **Step 1: Write LightTheme.xaml**
+
+```xml
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ── Page ── -->
+    <SolidColorBrush x:Key="PageBackground" Color="#F6F2EC"/>
+    <SolidColorBrush x:Key="LeftBarBackground" Color="#141210"/>
+    <SolidColorBrush x:Key="LeftBarForeground" Color="#F6F2EC"/>
+
+    <!-- ── Text ── -->
+    <SolidColorBrush x:Key="TextPrimary" Color="#1A1410"/>
+    <SolidColorBrush x:Key="TextSecondary" Color="#8A8070"/>
+    <SolidColorBrush x:Key="TextDisabled" Color="#C0B8A8"/>
+    <SolidColorBrush x:Key="TextMuted" Color="#B0A090"/>
+
+    <!-- ── Dividers ── -->
+    <SolidColorBrush x:Key="DividerColor" Color="#E8E2D8"/>
+    <SolidColorBrush x:Key="DividerDark" Color="#2A2622"/>
+
+    <!-- ── Checkbox ── -->
+    <SolidColorBrush x:Key="CheckFill" Color="#1A1410"/>
+    <SolidColorBrush x:Key="CheckBorder" Color="#D0C8B8"/>
+    <SolidColorBrush x:Key="CheckBorderDisabled" Color="#D0C8B8"/>
+
+    <!-- ── Tags ── -->
+    <SolidColorBrush x:Key="TagBackground" Color="#ECE6DC"/>
+
+    <!-- ── Input ── -->
+    <SolidColorBrush x:Key="InputUnderline" Color="#D0C8B8"/>
+    <SolidColorBrush x:Key="InputUnderlineFocus" Color="#1A1410"/>
+
+    <!-- ── ARM Button ── -->
+    <SolidColorBrush x:Key="ArmBorder" Color="#F6F2EC"/>
+    <SolidColorBrush x:Key="ArmBorderOpacity" Opacity="0.35" Color="#F6F2EC"/>
+
+    <!-- ── Status ── -->
+    <SolidColorBrush x:Key="StatusDotIdle" Color="#F6F2EC" Opacity="0.35"/>
+    <SolidColorBrush x:Key="StatusDotActive" Color="#F6F2EC"/>
+    <SolidColorBrush x:Key="StatusGiantText" Color="#E0D8CC"/>
+
+    <!-- ── Carved mark ── -->
+    <SolidColorBrush x:Key="CarvedLight" Color="#F6F2EC" Opacity="0.15"/>
+    <SolidColorBrush x:Key="CarvedDark" Color="#000000" Opacity="0.5"/>
+
+    <!-- ── Section label ── -->
+    <SolidColorBrush x:Key="SectionLabel" Color="#B0A090"/>
+    <SolidColorBrush x:Key="SectionLabelDark" Color="#8A8070"/>
+
+</ResourceDictionary>
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add Resources/LightTheme.xaml
+git commit -m "feat: add light theme resource dictionary"
+```
+
+---
+
+### Task 2: Create Resources/DarkTheme.xaml
+
+**Files:**
+- Create: `Resources/DarkTheme.xaml`
+
+- [ ] **Step 1: Write DarkTheme.xaml**
+
+```xml
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ── Page ── -->
+    <SolidColorBrush x:Key="PageBackground" Color="#1A1816"/>
+    <SolidColorBrush x:Key="LeftBarBackground" Color="#F0ECE4"/>
+    <SolidColorBrush x:Key="LeftBarForeground" Color="#1A1816"/>
+
+    <!-- ── Text ── -->
+    <SolidColorBrush x:Key="TextPrimary" Color="#F0ECE4"/>
+    <SolidColorBrush x:Key="TextSecondary" Color="#8A8070"/>
+    <SolidColorBrush x:Key="TextDisabled" Color="#5A5450"/>
+    <SolidColorBrush x:Key="TextMuted" Color="#8A8070"/>
+
+    <!-- ── Dividers ── -->
+    <SolidColorBrush x:Key="DividerColor" Color="#2A2622"/>
+    <SolidColorBrush x:Key="DividerDark" Color="#2A2622"/>
+
+    <!-- ── Checkbox ── -->
+    <SolidColorBrush x:Key="CheckFill" Color="#F0ECE4"/>
+    <SolidColorBrush x:Key="CheckBorder" Color="#4A4440"/>
+    <SolidColorBrush x:Key="CheckBorderDisabled" Color="#4A4440"/>
+
+    <!-- ── Tags ── -->
+    <SolidColorBrush x:Key="TagBackground" Color="#242220"/>
+
+    <!-- ── Input ── -->
+    <SolidColorBrush x:Key="InputUnderline" Color="#4A4440"/>
+    <SolidColorBrush x:Key="InputUnderlineFocus" Color="#F0ECE4"/>
+
+    <!-- ── ARM Button ── -->
+    <SolidColorBrush x:Key="ArmBorder" Color="#1A1816"/>
+    <SolidColorBrush x:Key="ArmBorderOpacity" Opacity="0.35" Color="#1A1816"/>
+
+    <!-- ── Status ── -->
+    <SolidColorBrush x:Key="StatusDotIdle" Color="#1A1816" Opacity="0.35"/>
+    <SolidColorBrush x:Key="StatusDotActive" Color="#1A1816"/>
+    <SolidColorBrush x:Key="StatusGiantText" Color="#2A2622"/>
+
+    <!-- ── Carved mark ── -->
+    <SolidColorBrush x:Key="CarvedLight" Color="#1A1816" Opacity="0.15"/>
+    <SolidColorBrush x:Key="CarvedDark" Color="#F0ECE4" Opacity="0.04"/>
+
+    <!-- ── Section label ── -->
+    <SolidColorBrush x:Key="SectionLabel" Color="#8A8070"/>
+    <SolidColorBrush x:Key="SectionLabelDark" Color="#8A8070"/>
+
+</ResourceDictionary>
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add Resources/DarkTheme.xaml
+git commit -m "feat: add dark theme resource dictionary"
+```
+
+---
+
+### Task 3: Create Services/ThemeManager.cs
+
+**Files:**
+- Create: `Services/ThemeManager.cs`
+
+- [ ] **Step 1: Write ThemeManager.cs**
+
+```csharp
+using System;
+using System.Windows;
+using Microsoft.Win32;
+
+namespace SGuardLimiterMax.Services
+{
+    public static class ThemeManager
+    {
+        private const string LightThemePath = "Resources/LightTheme.xaml";
+        private const string DarkThemePath  = "Resources/DarkTheme.xaml";
+
+        public static bool IsDarkTheme { get; private set; }
+
+        public static void Initialize()
+        {
+            IsDarkTheme = DetectSystemTheme();
+            ApplyTheme(IsDarkTheme);
+        }
+
+        private static bool DetectSystemTheme()
+        {
+            try
+            {
+                using var key = Registry.CurrentUser.OpenSubKey(
+                    @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+                var value = key?.GetValue("AppsUseLightTheme");
+                if (value is int intVal)
+                    return intVal == 0; // 0 = dark, 1 = light
+            }
+            catch { }
+            return false; // default to light
+        }
+
+        private static void ApplyTheme(bool dark)
+        {
+            var dict = new ResourceDictionary
+            {
+                Source = new Uri(dark ? DarkThemePath : LightThemePath, UriKind.Relative)
+            };
+
+            // Remove any previously loaded theme dictionary
+            var toRemove = Application.Current.Resources.MergedDictionaries;
+            for (int i = toRemove.Count - 1; i >= 0; i--)
+            {
+                var src = toRemove[i].Source?.ToString() ?? "";
+                if (src.Contains("Theme.xaml"))
+                    toRemove.RemoveAt(i);
+            }
+
+            Application.Current.Resources.MergedDictionaries.Add(dict);
+        }
+    }
+}
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add Services/ThemeManager.cs
+git commit -m "feat: add ThemeManager for light/dark theme detection"
+```
+
+---
+
+### Task 4: Update App.xaml.cs to initialize theme
+
+**Files:**
+- Modify: `App.xaml.cs`
+
+- [ ] **Step 1: Add theme initialization to App.xaml.cs**
+
+In `App.xaml.cs`, add `using SGuardLimiterMax.Services;` at the top, then add `ThemeManager.Initialize();` as the first line of the `OnStartup` method body (before the mutex check):
+
+```csharp
+// In OnStartup, add as the very first line:
+ThemeManager.Initialize();
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add App.xaml.cs
+git commit -m "feat: initialize theme on app startup"
+```
+
+---
+
+### Task 5: Rewrite MainWindow.xaml
+
+**Files:**
+- Modify: `MainWindow.xaml` (complete rewrite)
+
+- [ ] **Step 1: Write the complete new MainWindow.xaml**
+
+```xml
+<Window x:Class="SGuardLimiterMax.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="SGuard Limiter Max" Icon="/Assets/SGuard_Limiter_Max.png"
+        Height="680" Width="880" MinWidth="760" MinHeight="580"
+        WindowStyle="None" AllowsTransparency="False"
+        Background="{DynamicResource PageBackground}"
+        WindowStartupLocation="CenterScreen" ResizeMode="CanResize">
+
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="0" ResizeBorderThickness="6"
+                            GlassFrameThickness="0" UseAeroCaptionButtons="False"/>
+    </shell:WindowChrome.WindowChrome>
+
+    <Window.Resources>
+
+        <!-- ═══ Section Label ═══ -->
+        <Style x:Key="SectionLabel" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="7"/>
+            <Setter Property="FontWeight" Value="Regular"/>
+            <Setter Property="Foreground" Value="{DynamicResource SectionLabel}"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+
+        <!-- ═══ Square Checkbox (main items, 14px) ═══ -->
+        <Style x:Key="SquareCheck" TargetType="CheckBox">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <StackPanel Orientation="Horizontal">
+                            <Border x:Name="Chk" Width="14" Height="14"
+                                    BorderBrush="{DynamicResource CheckBorder}"
+                                    BorderThickness="1.5" Margin="0,0,10,0"
+                                    VerticalAlignment="Center"/>
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Chk" Property="Background" Value="{DynamicResource CheckFill}"/>
+                                <Setter TargetName="Chk" Property="BorderBrush" Value="{DynamicResource CheckFill}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="False">
+                                <Setter Property="Foreground" Value="{DynamicResource TextDisabled}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ═══ Small Square Checkbox (runtime items, 12px) ═══ -->
+        <Style x:Key="SmallSquareCheck" TargetType="CheckBox">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <StackPanel Orientation="Horizontal">
+                            <Border x:Name="Chk" Width="12" Height="12"
+                                    BorderBrush="{DynamicResource CheckBorder}"
+                                    BorderThickness="1.5" Margin="0,0,8,0"
+                                    VerticalAlignment="Center"/>
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Chk" Property="Background" Value="{DynamicResource CheckFill}"/>
+                                <Setter TargetName="Chk" Property="BorderBrush" Value="{DynamicResource CheckFill}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="False">
+                                <Setter Property="Foreground" Value="{DynamicResource TextDisabled}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ═══ Inline Selector (Power Plan / Timer) ═══ -->
+        <Style x:Key="InlineCombo" TargetType="ComboBox">
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="9"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <Border Background="Transparent" BorderThickness="0"
+                                    BorderBrush="Transparent">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" VerticalAlignment="Center"
+                                               Text="{TemplateBinding SelectionBoxItem}"
+                                               TextDecorations="Underline"
+                                               Foreground="{DynamicResource TextSecondary}"/>
+                                    <TextBlock Grid.Column="1" Text="▾" FontSize="8"
+                                               Foreground="{DynamicResource TextSecondary}"
+                                               VerticalAlignment="Center" Margin="2,0,0,0"/>
+                                </Grid>
+                            </Border>
+                            <Popup x:Name="PART_Popup" IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True" Focusable="False"
+                                   PopupAnimation="Slide" Placement="Bottom">
+                                <Border Background="{DynamicResource PageBackground}"
+                                        BorderBrush="{DynamicResource DividerColor}"
+                                        BorderThickness="1" MinWidth="160" MaxHeight="200">
+                                    <ScrollViewer><ItemsPresenter/></ScrollViewer>
+                                </Border>
+                            </Popup>
+                            <ToggleButton Background="Transparent" BorderThickness="0"
+                                          IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                          Focusable="False"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Padding" Value="10,5"/>
+                        <Setter Property="FontSize" Value="10"/>
+                        <Setter Property="FontFamily" Value="Segoe UI"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ComboBoxItem">
+                                    <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                            Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsHighlighted" Value="True">
+                                            <Setter TargetName="Bd" Property="Background"
+                                                    Value="{DynamicResource TagBackground}"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ═══ Text Link (apply / save / change) ═══ -->
+        <Style x:Key="TextLink" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="8"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <TextBlock Text="{TemplateBinding Content}"
+                                   Foreground="{TemplateBinding Foreground}"
+                                   VerticalAlignment="Center"
+                                   TextDecorations="Underline"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ═══ ARM Button (border-only, in left bar) ═══ -->
+        <Style x:Key="ArmButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource LeftBarForeground}"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="Transparent"
+                                BorderBrush="{DynamicResource ArmBorderOpacity}"
+                                BorderThickness="1.5" Padding="10,6">
+                            <TextBlock Text="{TemplateBinding Content}"
+                                       Foreground="{TemplateBinding Foreground}"
+                                       HorizontalAlignment="Center"
+                                       LetterSpacing="2"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush"
+                                        Value="{DynamicResource ArmBorder}"/>
+                                <Setter TargetName="Bd" Property="BorderThickness" Value="1.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ═══ Title bar button ═══ -->
+        <Style x:Key="TitleBarBtn" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource LeftBarForeground}"/>
+            <Setter Property="Opacity" Value="0.3"/>
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="Transparent">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ═══ Dark TextBox (underline style) ═══ -->
+        <Style x:Key="DarkTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource InputUnderline}"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Padding" Value="4,4"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="Bd" Background="Transparent"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush"
+                                        Value="{DynamicResource InputUnderlineFocus}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- ROOT LAYOUT                                                         -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="170"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ═══ LEFT BLACK BAR ═══ -->
+        <Border Grid.Column="0" Background="{DynamicResource LeftBarBackground}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Drag handle for window -->
+                <Grid.Background>
+                    <SolidColorBrush Color="Transparent"/>
+                </Grid.Background>
+
+                <!-- Brand -->
+                <StackPanel Grid.Row="0" Margin="16,22,16,0"
+                            MouseLeftButtonDown="Window_MouseLeftButtonDown">
+                    <TextBlock FontFamily="Georgia" FontSize="20" LineHeight="19"
+                               Foreground="{DynamicResource LeftBarForeground}"
+                               LetterSpacing="1">
+                        SGUARD<LineBreak/>LIMITER<LineBreak/>MAX
+                    </TextBlock>
+                    <Border Width="20" Height="2" Margin="0,12,0,0"
+                            Background="{DynamicResource LeftBarForeground}"
+                            Opacity="0.3"/>
+                    <TextBlock FontFamily="Segoe UI" FontSize="7" LetterSpacing="2"
+                               Foreground="{DynamicResource LeftBarForeground}"
+                               Opacity="0.45" Margin="0,6,0,0">
+                        PERFORMANCE<LineBreak/>UTILITY v1.1
+                    </TextBlock>
+                </StackPanel>
+
+                <!-- Status -->
+                <StackPanel Grid.Row="1" Margin="16,30,16,0">
+                    <TextBlock FontFamily="Segoe UI" FontSize="7" LetterSpacing="2"
+                               Foreground="{DynamicResource LeftBarForeground}"
+                               Opacity="0.35" Margin="0,0,0,4">
+                        STATUS
+                    </TextBlock>
+                    <Ellipse Width="7" Height="7" Margin="0,0,0,8">
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Setter Property="Fill" Value="{DynamicResource StatusDotIdle}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsGameRunning}" Value="True">
+                                        <Setter Property="Fill" Value="{DynamicResource StatusDotActive}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <TextBlock FontFamily="Segoe UI" FontSize="11" LetterSpacing="1"
+                               Foreground="{DynamicResource LeftBarForeground}"
+                               Opacity="0.5">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="IDLE"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsGameRunning}" Value="True">
+                                        <Setter Property="Text" Value="ACTIVE"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+
+                <!-- ARM + Save + Close buttons -->
+                <StackPanel Grid.Row="2" VerticalAlignment="Bottom" Margin="16,0,16,0">
+                    <Button Style="{StaticResource ArmButton}" Content="ARM"
+                            Click="BtnEnterMonitor_Click" Margin="0,0,0,8"/>
+                    <Button Content="save" Click="BtnSaveConfig_Click" Margin="0,0,0,4">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Foreground" Value="{DynamicResource LeftBarForeground}"/>
+                                <Setter Property="Opacity" Value="0.3"/>
+                                <Setter Property="FontFamily" Value="Segoe UI"/>
+                                <Setter Property="FontSize" Value="7"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <ContentPresenter/>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Style="{StaticResource TitleBarBtn}" Content="—"
+                                Click="BtnMinimize_Click"/>
+                        <Button Style="{StaticResource TitleBarBtn}" Content="✕"
+                                Click="BtnClose_Click" Width="28"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Carved mark -->
+                <Grid Grid.Row="3" Margin="0,0,0,14">
+                    <TextBlock FontFamily="Georgia" FontSize="13"
+                               Foreground="{DynamicResource CarvedDark}"
+                               Text="Nº 001" HorizontalAlignment="Center"
+                               Margin="0,1,0,0"/>
+                    <TextBlock FontFamily="Georgia" FontSize="13"
+                               Foreground="{DynamicResource CarvedLight}"
+                               Text="Nº 001" HorizontalAlignment="Center"/>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- ═══ RIGHT CONTENT ═══ -->
+        <Border Grid.Column="1" Padding="26,22">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- OPTIMIZATIONS section -->
+                <TextBlock Grid.Row="0" Style="{StaticResource SectionLabel}"
+                           Text="OPTIMIZATIONS"/>
+
+                <StackPanel Grid.Row="1">
+                    <!-- Throttle SGuard -->
+                    <Border BorderBrush="{DynamicResource DividerColor}"
+                            BorderThickness="0,0,0,1" Padding="0,7">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource SquareCheck}"
+                                      IsChecked="{Binding ThrottleSGuard}"/>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                                       FontFamily="Segoe UI" FontSize="11"
+                                       Foreground="{DynamicResource TextPrimary}"
+                                       Text="Throttle SGuard"/>
+                            <TextBlock Grid.Column="2" VerticalAlignment="Center"
+                                       FontFamily="Segoe UI" FontSize="9"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       Text="Idle · Last core"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Boost Game Priority -->
+                    <Border BorderBrush="{DynamicResource DividerColor}"
+                            BorderThickness="0,0,0,1" Padding="0,7">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource SquareCheck}"
+                                      IsChecked="{Binding BoostGamePriority}"/>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                                       FontFamily="Segoe UI" FontSize="11"
+                                       Foreground="{DynamicResource TextPrimary}"
+                                       Text="Boost Game Priority"/>
+                            <TextBlock Grid.Column="2" VerticalAlignment="Center"
+                                       FontFamily="Segoe UI" FontSize="9"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       Text="High class"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Unbind CPU 0 -->
+                    <Border BorderBrush="{DynamicResource DividerColor}"
+                            BorderThickness="0,0,0,1" Padding="0,7">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource SquareCheck}"
+                                      IsChecked="{Binding UnbindCPU}"/>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                                       FontFamily="Segoe UI" FontSize="11"
+                                       Foreground="{DynamicResource TextPrimary}"
+                                       Text="Unbind CPU 0"/>
+                            <TextBlock Grid.Column="2" VerticalAlignment="Center"
+                                       FontFamily="Segoe UI" FontSize="9"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       Text="Off"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Power Plan with inline selector -->
+                    <Border BorderBrush="{DynamicResource DividerColor}"
+                            BorderThickness="0,0,0,1" Padding="0,7">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource SquareCheck}"
+                                      IsChecked="{Binding OptimizePower}"/>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                                       FontFamily="Segoe UI" FontSize="11"
+                                       Foreground="{DynamicResource TextPrimary}"
+                                       Text="Power Plan"/>
+                            <ComboBox Grid.Column="2" Style="{StaticResource InlineCombo}"
+                                      ItemsSource="{Binding AvailablePowerPlans}"
+                                      SelectedItem="{Binding SelectedTargetPlan, Mode=TwoWay}"
+                                      DisplayMemberPath="Name" Margin="6,0,0,0"
+                                      ToolTip="Switch to this plan on game detection (empty = auto-select best)"/>
+                            <Button Grid.Column="3" Content="apply"
+                                    Style="{StaticResource TextLink}"
+                                    Click="BtnApplyPlan_Click" Margin="10,0,0,0"/>
+                            <Button Grid.Column="4" Content="refresh"
+                                    Style="{StaticResource TextLink}"
+                                    Click="BtnRefreshPlans_Click" Margin="6,0,0,0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Flush DNS -->
+                    <Border BorderBrush="{DynamicResource DividerColor}"
+                            BorderThickness="0,0,0,1" Padding="0,7">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource SquareCheck}"
+                                      IsChecked="{Binding FlushDNS}"/>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                                       FontFamily="Segoe UI" FontSize="11"
+                                       Foreground="{DynamicResource TextPrimary}"
+                                       Text="Flush DNS"/>
+                            <TextBlock Grid.Column="2" VerticalAlignment="Center"
+                                       FontFamily="Segoe UI" FontSize="9"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       Text="On detect"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Timer Resolution with inline selector -->
+                    <Border Padding="0,7">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource SquareCheck}"
+                                      IsChecked="{Binding TimerResolution}"/>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                                       FontFamily="Segoe UI" FontSize="11"
+                                       Foreground="{DynamicResource TextPrimary}"
+                                       Text="Timer Resolution"/>
+                            <ComboBox Grid.Column="2" Style="{StaticResource InlineCombo}"
+                                      ItemsSource="{Binding TimerResolutionOptions}"
+                                      SelectedItem="{Binding SelectedTimerResolutionOption, Mode=TwoWay}"
+                                      DisplayMemberPath="Label" Margin="6,0,0,0"
+                                      ToolTip="Applied on game detection, restored on exit"/>
+                            <Button Grid.Column="3" Content="apply"
+                                    Style="{StaticResource TextLink}"
+                                    Click="BtnApplyTimer_Click" Margin="10,0,0,0"/>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+
+                <!-- CUSTOM GAMES section -->
+                <StackPanel Grid.Row="2" Margin="0,16,0,0">
+                    <TextBlock Style="{StaticResource SectionLabel}"
+                               Text="CUSTOM GAMES"/>
+
+                    <!-- Game tags -->
+                    <ItemsControl ItemsSource="{Binding CustomGames}" Margin="0,0,0,8">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{DynamicResource TagBackground}"
+                                        Padding="8,4" Margin="0,0,6,6">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center"
+                                                   FontFamily="Segoe UI" FontSize="10"
+                                                   Foreground="{DynamicResource TextPrimary}"/>
+                                        <!-- Priority dot -->
+                                        <Border Width="8" Height="8" Margin="6,0,0,0"
+                                                VerticalAlignment="Center">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="{DynamicResource CheckFill}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding BoostPriority}" Value="False">
+                                                            <Setter Property="Background" Value="Transparent"/>
+                                                            <Setter Property="BorderBrush" Value="{DynamicResource CheckBorder}"/>
+                                                            <Setter Property="BorderThickness" Value="1.5"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                        </Border>
+                                        <!-- CPU0 dot -->
+                                        <Border Width="8" Height="8" Margin="3,0,0,0"
+                                                VerticalAlignment="Center">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="{DynamicResource CheckFill}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding UnbindCpu0}" Value="False">
+                                                            <Setter Property="Background" Value="Transparent"/>
+                                                            <Setter Property="BorderBrush" Value="{DynamicResource CheckBorder}"/>
+                                                            <Setter Property="BorderThickness" Value="1.5"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                        </Border>
+                                        <!-- Remove -->
+                                        <Button Content="×" Tag="{Binding}" Click="BtnRemoveGame_Click"
+                                                Margin="6,0,0,0" VerticalAlignment="Center"
+                                                FontFamily="Segoe UI" FontSize="12"
+                                                Foreground="{DynamicResource TextMuted}"
+                                                Background="Transparent" BorderThickness="0"
+                                                Cursor="Hand" Padding="2,0"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Empty state -->
+                    <TextBlock FontFamily="Segoe UI" FontSize="10"
+                               Foreground="{DynamicResource TextDisabled}"
+                               Margin="0,0,0,8" Text="No custom processes. Add one below.">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding CustomGames.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <!-- Add game form (inline) -->
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox x:Name="TxtProcessName" Style="{StaticResource DarkTextBox}"
+                                 Width="110" Margin="0,0,6,0"
+                                 Tag="ProcessName"/>
+                        <TextBox x:Name="TxtDisplayName" Style="{StaticResource DarkTextBox}"
+                                 Width="90" Margin="0,0,8,0"
+                                 Tag="DisplayName"/>
+                        <CheckBox x:Name="ChkBoostPriority" IsChecked="True"
+                                  VerticalAlignment="Center" Margin="0,0,4,0">
+                            <CheckBox.Style>
+                                <Style TargetType="CheckBox">
+                                    <Setter Property="FontFamily" Value="Segoe UI"/>
+                                    <Setter Property="FontSize" Value="9"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                </Style>
+                            </CheckBox.Style>
+                        </CheckBox>
+                        <TextBlock Text="Hi" FontFamily="Segoe UI" FontSize="9"
+                                   Foreground="{DynamicResource TextSecondary}"
+                                   VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <CheckBox x:Name="ChkUnbindCpu0"
+                                  VerticalAlignment="Center" Margin="0,0,4,0">
+                            <CheckBox.Style>
+                                <Style TargetType="CheckBox">
+                                    <Setter Property="FontFamily" Value="Segoe UI"/>
+                                    <Setter Property="FontSize" Value="9"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                </Style>
+                            </CheckBox.Style>
+                        </CheckBox>
+                        <TextBlock Text="CPU0" FontFamily="Segoe UI" FontSize="9"
+                                   Foreground="{DynamicResource TextSecondary}"
+                                   VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <Button Content="add" Style="{StaticResource TextLink}"
+                                Click="BtnAddGame_Click" FontSize="10"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- RUNTIME section -->
+                <StackPanel Grid.Row="3" Margin="0,16,0,0" VerticalAlignment="Top">
+                    <TextBlock Style="{StaticResource SectionLabel}"
+                               Text="RUNTIME"/>
+
+                    <UniformGrid Columns="2" Rows="3">
+                        <CheckBox Style="{StaticResource SmallSquareCheck}"
+                                  IsChecked="{Binding AutoMinimizeOnGame}"
+                                  Content="Auto-minimize to tray"/>
+                        <CheckBox Style="{StaticResource SmallSquareCheck}"
+                                  IsChecked="{Binding ExitWithGame}"
+                                  Content="Exit with game"/>
+                        <CheckBox Style="{StaticResource SmallSquareCheck}"
+                                  IsChecked="{Binding AutoStart}"
+                                  Content="Auto-start on boot"/>
+                        <CheckBox Style="{StaticResource SmallSquareCheck}"
+                                  IsChecked="{Binding RestorePowerOnExit}"
+                                  Content="Restore power on exit"/>
+                        <CheckBox Style="{StaticResource SmallSquareCheck}"
+                                  IsChecked="{Binding RestoreTimerOnExit}"
+                                  Content="Restore timer on exit"/>
+                        <CheckBox Style="{StaticResource SmallSquareCheck}"
+                                  IsChecked="{Binding ShowNotifications}"
+                                  Content="Balloon notifications"/>
+                    </UniformGrid>
+                </StackPanel>
+
+                <!-- Bottom status zone -->
+                <Border Grid.Row="4" BorderBrush="{DynamicResource DividerColor}"
+                        BorderThickness="0,1,0,0" Padding="0,8,0,0"
+                        Margin="0,10,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Giant status text -->
+                        <StackPanel Grid.Column="0" VerticalAlignment="Bottom">
+                            <TextBlock FontFamily="Georgia" FontSize="40" FontWeight="Light"
+                                       LineHeight="36"
+                                       Foreground="{DynamicResource StatusGiantText}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="IDLE"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsGameRunning}" Value="True">
+                                                <Setter Property="Text" Value="ACTIVE"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <TextBlock FontFamily="Segoe UI" FontSize="9"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       Text="{Binding StatusText}"
+                                       TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+
+                        <!-- Apply Now -->
+                        <Button Grid.Column="1" VerticalAlignment="Bottom"
+                                Content="APPLY NOW" Click="BtnApplyNow_Click"
+                                FontFamily="Segoe UI" FontSize="10"
+                                Foreground="{DynamicResource TextPrimary}"
+                                Background="Transparent" BorderBrush="{DynamicResource TextPrimary}"
+                                BorderThickness="1.5" Padding="16,8"
+                                Cursor="Hand" LetterSpacing="1">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bd" Background="Transparent"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bd" Property="Background"
+                                                    Value="{DynamicResource TextPrimary}"/>
+                                            <Setter Property="Foreground"
+                                                    Value="{DynamicResource PageBackground}"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add MainWindow.xaml
+git commit -m "feat: rewrite UI in Swiss Poster editorial style"
+```
+
+---
+
+### Task 6: Build and verify
+
+**Files:** None (verification only)
+
+- [ ] **Step 1: Build the project**
+
+```bash
+cd "D:/打瓦/SGuardLimiterMax/.claude/worktrees/charming-bhabha-efc469"
+dotnet build
+```
+
+Expected: Build succeeds with zero errors.
+
+- [ ] **Step 2: Verify all bindings and event handlers are intact**
+
+```bash
+cd "D:/打瓦/SGuardLimiterMax/.claude/worktrees/charming-bhabha-efc469"
+# Check that all event handlers exist in both XAML and code-behind
+grep -c "BtnMinimize_Click" MainWindow.xaml MainWindow.xaml.cs
+grep -c "BtnClose_Click" MainWindow.xaml MainWindow.xaml.cs
+grep -c "BtnEnterMonitor_Click" MainWindow.xaml MainWindow.xaml.cs
+grep -c "BtnSaveConfig_Click" MainWindow.xaml MainWindow.xaml.cs
+grep -c "BtnApplyNow_Click" MainWindow.xaml MainWindow.xaml.cs
+grep -c "BtnApplyPlan_Click" MainWindow.xaml MainWindow.xaml.cs
+grep -c "BtnRefreshPlans_Click" MainWindow.xaml MainWindow.xaml.cs
+grep -c "BtnApplyTimer_Click" MainWindow.xaml MainWindow.xaml.cs
+grep -c "BtnAddGame_Click" MainWindow.xaml MainWindow.xaml.cs
+grep -c "BtnRemoveGame_Click" MainWindow.xaml MainWindow.xaml.cs
+```
+
+Expected: Each handler appears exactly once in each file.
+
+- [ ] **Step 3: Verify named elements**
+
+```bash
+grep -c "x:Name=\"TxtProcessName\"" MainWindow.xaml
+grep -c "x:Name=\"TxtDisplayName\"" MainWindow.xaml
+grep -c "x:Name=\"ChkBoostPriority\"" MainWindow.xaml
+grep -c "x:Name=\"ChkUnbindCpu0\"" MainWindow.xaml
+```
+
+Expected: Each returns 1.
+
+- [ ] **Step 4: Commit any cleanup**
+
+```bash
+git status
+# Only if there are changes:
+git add -A && git commit -m "chore: final build verification"
+```

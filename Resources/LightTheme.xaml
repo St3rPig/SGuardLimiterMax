@@ -1,0 +1,51 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ── Page ── -->
+    <SolidColorBrush x:Key="PageBackground" Color="#F6F2EC"/>
+    <SolidColorBrush x:Key="LeftBarBackground" Color="#141210"/>
+    <SolidColorBrush x:Key="LeftBarForeground" Color="#F6F2EC"/>
+
+    <!-- ── Text ── -->
+    <SolidColorBrush x:Key="TextPrimary" Color="#1A1410"/>
+    <SolidColorBrush x:Key="TextSecondary" Color="#8A8070"/>
+    <SolidColorBrush x:Key="TextDisabled" Color="#C0B8A8"/>
+    <SolidColorBrush x:Key="TextMuted" Color="#B0A090"/>
+
+    <!-- ── Dividers ── -->
+    <SolidColorBrush x:Key="DividerColor" Color="#E8E2D8"/>
+    <SolidColorBrush x:Key="DividerDark" Color="#2A2622"/>
+
+    <!-- ── Checkbox ── -->
+    <SolidColorBrush x:Key="CheckFill" Color="#1A1410"/>
+    <SolidColorBrush x:Key="CheckBorder" Color="#D0C8B8"/>
+    <SolidColorBrush x:Key="CheckBorderDisabled" Color="#D0C8B8"/>
+
+    <!-- ── Tags ── -->
+    <SolidColorBrush x:Key="TagBackground" Color="#ECE6DC"/>
+
+    <!-- ── Input ── -->
+    <SolidColorBrush x:Key="InputUnderline" Color="#D0C8B8"/>
+    <SolidColorBrush x:Key="InputUnderlineFocus" Color="#1A1410"/>
+
+    <!-- ── ARM Button ── -->
+    <SolidColorBrush x:Key="ArmBorder" Color="#F6F2EC"/>
+    <SolidColorBrush x:Key="ArmBorderOpacity" Opacity="0.35" Color="#F6F2EC"/>
+
+    <!-- ── Status ── -->
+    <SolidColorBrush x:Key="StatusDotIdle" Color="#F6F2EC" Opacity="0.35"/>
+    <SolidColorBrush x:Key="StatusDotActive" Color="#F6F2EC"/>
+    <SolidColorBrush x:Key="StatusGiantText" Color="#E0D8CC"/>
+
+    <!-- ── Carved mark ── -->
+    <SolidColorBrush x:Key="CarvedLight" Color="#F6F2EC" Opacity="0.15"/>
+    <SolidColorBrush x:Key="CarvedDark" Color="#000000" Opacity="0.5"/>
+
+    <!-- ── Dialog ── -->
+    <SolidColorBrush x:Key="DialogBackground" Color="#1C1812"/>
+
+    <!-- ── Section label ── -->
+    <SolidColorBrush x:Key="SectionLabel" Color="#B0A090"/>
+    <SolidColorBrush x:Key="SectionLabelDark" Color="#8A8070"/>
+
+</ResourceDictionary>
